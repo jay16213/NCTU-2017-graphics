@@ -1,0 +1,79 @@
+#include "ViewLoader.h"
+#include <iostream>
+
+ViewLoader::ViewLoader() {}
+ViewLoader::~ViewLoader() {}
+
+int ViewLoader::loadView(string view_file)
+{
+    ifstream view(view_file, ios::in);
+    if(view.fail())
+    {
+        cout << "Can not open the view file '" << view_file << "'" << endl;
+        return -1;
+    }
+    
+    char param_name[20];
+    while(!view.eof())
+    {
+        memset(param_name, 0, 20);
+        view >> param_name;
+        
+        if(strcmp(param_name, "eye") == 0)
+        {
+            double x, y, z;
+            view >> x >> y >> z;
+            mEye = Coord3(x, y, z);
+            printf("eye: %f %f %f\n", mEye[0], mEye[1], mEye[2]);
+        }
+        else if(strcmp(param_name, "vat") == 0)
+        {
+            double x, y, z;
+            view >> x >> y >> z;
+            mVat = Coord3(x, y, z);
+            printf("vat: %f %f %f\n", mVat[0], mVat[1], mVat[2]);
+        }
+        else if(strcmp(param_name, "vup") == 0)
+        {
+            double x, y, z;
+            view >> x >> y >> z;
+            mVup = Coord3(x, y, z);
+            printf("vup: %f %f %f\n", mVup[0], mVup[1], mVup[2]);
+        }
+        else if(strcmp(param_name, "fovy") == 0)
+        {
+            double theta;
+            view >> theta;
+            mFovy = theta;
+            printf("dfovy: %f\n", mFovy);
+        }
+        else if(strcmp(param_name, "dnear") == 0)
+        {
+            double d;
+            view >> d;
+            mDnear = d;
+            printf("dnear: %f\n", mDnear);
+        }
+        else if(strcmp(param_name, "dfar") == 0)
+        {
+            double d;
+            view >> d;
+            mDfar = d;
+            printf("dfar: %f\n", mDfar);
+        }
+        else if(strcmp(param_name, "viewport") == 0)
+        {
+            int x, y, w, h;
+            view >> x >> y >> w >> h;
+            mViewport[0] = x;
+            mViewport[1] = y;
+            mViewport[2] = w;
+            mViewport[3] = h;
+            mAspect = (float) w / h;
+            printf("viewport: %d %d %d %d\n", mViewport[0], mViewport[1], mViewport[2], mViewport[3]);
+        }
+    }
+    
+    view.close();
+    return 0;
+}
