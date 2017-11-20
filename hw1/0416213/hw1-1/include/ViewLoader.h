@@ -18,6 +18,7 @@ class ViewLoader{
         
         Coord3 mEye;
         Coord3 mVat;
+        Coord3d mUnitVat;//unit vector of mVat
         Coord3 mVup;
         double mFovy;
         double mDnear;

@@ -1,6 +1,6 @@
 #include "ViewLoader.h"
 #include <iostream>
-
+#include <cmath>
 ViewLoader::ViewLoader() {}
 ViewLoader::~ViewLoader() {}
 
@@ -32,6 +32,13 @@ int ViewLoader::loadView(string view_file)
             view >> x >> y >> z;
             mVat = Coord3(x, y, z);
             printf("vat: %f %f %f\n", mVat[0], mVat[1], mVat[2]);
+
+            Coord3d v(mVat[0] - mEye[0], mVat[1] - mEye[1], mVat[2] - mEye[2]);
+            double len = v.vecLen();
+            printf("%f %f %f\n", v[0], v[1], v[2]);
+            for (int i = 0; i < 3; i++)
+                mUnitVat[i] = (double) (v[i] / len);
+            printf("unit: %f %f %f\n", mUnitVat[0], mUnitVat[1], mUnitVat[2]);
         }
         else if(strcmp(param_name, "vup") == 0)
         {

@@ -48,7 +48,7 @@ int main(int argc, char **argv)
             scene.loadScene(srcRootPath + string("scene.scene"));
             light.loadLight(srcRootPath + string("light.light"));
             view.loadView(srcRootPath + string("view.view"));
-            zoomDegree = 12.0;
+            zoomDegree = 20.0;
             dragDegree = 1.0;
             window_size = 800;
             break;
@@ -212,10 +212,14 @@ void Keyboard(unsigned char key, int x, int y)
     switch (key)
     {
         case 'w'://zoom in
-            view.mEye[Z] -= zoomDegree;
+            view.mEye[X] += view.mUnitVat[X] * zoomDegree;
+            view.mEye[Y] += view.mUnitVat[Y] * zoomDegree;
+            view.mEye[Z] += view.mUnitVat[Z] * zoomDegree;
             break;
         case 's'://zoom out
-            view.mEye[Z] += zoomDegree;
+            view.mEye[X] -= view.mUnitVat[X] * zoomDegree;
+            view.mEye[Y] -= view.mUnitVat[Y] * zoomDegree;
+            view.mEye[Z] -= view.mUnitVat[Z] * zoomDegree;
             break;
         case 'a'://move left (circle the center)
             if (view.mVat[X] >= zoomDegree*100) view.mVat[X] = -zoomDegree*100;
