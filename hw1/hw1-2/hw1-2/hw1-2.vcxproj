@@ -81,10 +81,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Coord3.h" />
+    <ClInclude Include="Srcpath.h" />
     <ClInclude Include="headers.h" />
     <ClInclude Include="LightLoader.h" />
     <ClInclude Include="mesh.h" />
-    <ClInclude Include="pipeline.h" />
     <ClInclude Include="SceneLoader.h" />
     <ClInclude Include="ViewLoader.h" />
   </ItemGroup>

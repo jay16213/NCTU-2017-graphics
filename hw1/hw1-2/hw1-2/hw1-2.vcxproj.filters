@@ -50,7 +50,7 @@
     <ClInclude Include="ViewLoader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="pipeline.h">
+    <ClInclude Include="Srcpath.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

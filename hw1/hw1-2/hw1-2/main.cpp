@@ -3,24 +3,46 @@
 SceneLoader scene;
 ViewLoader view;
 LightLoader light;
-vector<mesh> objects;
+map<int, mesh> objs;
 
 double zoomDegree = 0.0, dragDegree = 0.0, rotateDegree = M_PI / 180;
 int selectedObj = -1;
 
-string srcRootPath_park("Park/");
-//obj file
-string bush("bush.obj"), gem("gem.obj"), groundv2("groundv2.obj"), hedge("hedge.obj");
-string leaves("leaves.obj"), littleFountain("littleFountain.obj"), skybox("skybox.obj");
-string trunk("trunk.obj"), water("water.obj");
-
-string srcRootPath_chess("Chess/");
-string bishop("Bishop.obj"), chessboard("Chessboard.obj"), king("King.obj"), knight("Knight.obj");
-string pawn("Pawn.obj"), queen("Queen.obj"), rook("Rook.obj"), room("Room.obj");
 
 int main(int argc, char **argv)
-{    
-    loadPipelineData();
+{   
+    Srcpath files;
+    int res = 0;
+    printf("Please input the scene you want to test(1: Park; 2: Chess): ");
+    cin >> res;
+
+    switch (res)
+    {
+        case 1:
+            for (int i = 0; i < 9; i++)
+                objs.insert(pair<int, mesh>(i, files.srcRootPath_park + files.fNames[i]));
+            light.loadLight(files.srcRootPath_park + string("park.light"));
+            scene.loadScene(files.srcRootPath_park + string("park.scene"));
+            view.loadView(files.srcRootPath_park + string("park.view"));
+            zoomDegree = 20.0;
+            dragDegree = 0.8;
+            break;
+
+        case 2:
+            for (int i = 9; i < 17; i++)
+                objs.insert(pair<int, mesh>(i, files.srcRootPath_chess + files.fNames[i]));
+            light.loadLight(files.srcRootPath_chess + string("Chess.light"));
+            scene.loadScene(files.srcRootPath_chess + string("Chess.scene"));
+            view.loadView(files.srcRootPath_chess + string("Chess.view"));
+            zoomDegree = 0.1;
+            dragDegree = 50.0;
+            break;
+
+        default:
+            cout << "Error input" << endl;
+            exit(0);
+            break;
+    }
 
     glutInit(&argc, argv);
     glutInitWindowSize(800, 600);
@@ -33,40 +55,6 @@ int main(int argc, char **argv)
     glutMouseFunc(Mouse);
     glutMainLoop();
     return 0;
-}
-
-void loadPipelineData()
-{
-    int res = 0;
-    printf("Please input the scene you want to test(1: Park; 2: Chess): ");
-    cin >> res;
-
-    switch (res)
-    {
-    case 1:
-        /* load light, view, scene */
-        light.loadLight(srcRootPath_park + string("park.light"));
-        scene.loadScene(srcRootPath_park + string("park.scene"));
-        view.loadView(srcRootPath_park + string("park.view"));
-        zoomDegree = 20.0;
-        dragDegree = 0.8;
-        break;
-
-    case 2:
-        /* load light, view, scene */
-        light.loadLight(srcRootPath_chess + string("Chess.light"));
-        scene.loadScene(srcRootPath_chess + string("Chess.scene"));
-        view.loadView(srcRootPath_chess + string("Chess.view"));
-        zoomDegree = 0.1;
-        dragDegree = 50.0;
-        break;
-
-    default:
-        cout << "Error input" << endl;
-        exit(0);
-        break;
-    }
-    return;
 }
 
 void Display()
@@ -136,18 +124,22 @@ void objViewTransform()
     {
         glPushMatrix();
         glTranslatef(
-            scene.mTransfer[i][X],
-            scene.mTransfer[i][Y],
-            scene.mTransfer[i][Z]
-            );
+            scene.mObjects[i].mTransfer[X],
+            scene.mObjects[i].mTransfer[Y],
+            scene.mObjects[i].mTransfer[Z]
+        );
         glRotatef(
-            scene.mRotate[i].mAngle,
-            scene.mRotate[i].mAxisVec[X],
-            scene.mRotate[i].mAxisVec[Y],
-            scene.mRotate[i].mAxisVec[Z]
-            );
-        glScalef(scene.mScale[i][X], scene.mScale[i][Y], scene.mScale[i][Z]);
-        renderObj(objects[i]);
+            scene.mObjects[i].mRotate.mAngle,
+            scene.mObjects[i].mRotate.mAxisVec[X],
+            scene.mObjects[i].mRotate.mAxisVec[Y],
+            scene.mObjects[i].mRotate.mAxisVec[Z]
+        );
+        glScalef(
+            scene.mObjects[i].mScale[X],
+            scene.mObjects[i].mScale[Y],
+            scene.mObjects[i].mScale[Z]
+        );
+        renderObj(objs[scene.mObjects[i].mId]);
         glPopMatrix();
     }
 }
@@ -286,8 +278,8 @@ void Mouse(int button, int state, int x, int y)
         if (selectedObj >= 0)
         {
             printf("move: %d %d\n", x - last_x, y - last_y);
-            scene.mTransfer[selectedObj][X] += (double)((x - last_x) / dragDegree);
-            scene.mTransfer[selectedObj][Y] -= (double)((y - last_y) / dragDegree);
+            scene.mObjects[selectedObj].mTransfer[X] += (double)((x - last_x) / dragDegree);
+            scene.mObjects[selectedObj].mTransfer[Y] -= (double)((y - last_y) / dragDegree);
         }
         break;
 

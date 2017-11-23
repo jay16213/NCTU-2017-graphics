@@ -1,8 +1,7 @@
 #include "SceneLoader.h"
-#include <iostream>
 
 SceneLoader::SceneLoader() { mNumOfObjs = 0; }
-SceneLoader::~SceneLoader() {}
+SceneLoader::~SceneLoader() { mFiles.clear(); }
 
 int SceneLoader::loadScene(string scene_file)
 {
@@ -12,34 +11,83 @@ int SceneLoader::loadScene(string scene_file)
         printf("Can not open the scene file '%s'\n", scene_file.c_str());
         return -1;
     }
-    cout << "Load the scene info...";
+    cout << "Load the scene info..." << endl;
     
-    char param_name[20];
-    while(!scene.eof())
+    
+    string line, param_name;
+    while(getline(scene, line))
     {
-        memset(param_name, 0, 20);
-        scene >> param_name;
-        
-        if(strcmp(param_name, "model") == 0)
+        stringstream ss(line);
+        ss >> param_name;
+
+        if (param_name == "no-texture")
         {
-            char obj_name[20];
+            mType = NO_TEXTURE;
+        }
+        else if (param_name == "single-texture")
+        {
+            mType = SINGLE_TEXTURE;
+            mFiles.clear();
+            string file;
+            ss >> file;
+            mFiles.push_back(file);
+        }
+        else if (param_name == "multi-texture")
+        {
+            mType = MULTI_TEXTURE;
+            mFiles.clear();
+            string file;
+            while (ss >> file) mFiles.push_back(file);
+        }
+        else if (param_name == "cube-map")
+        {
+            mType = CUBE_MAP;
+            mFiles.clear();
+            string file;
+            while (ss >> file) mFiles.push_back(file);
+        }
+        else if(param_name == "model")
+        {
+            string obj_name;
             float s[3], angle, r[3], t[3];
-            memset(obj_name, 0, 20);
             
-            scene >> obj_name;
-            scene >> s[0] >> s[1] >> s[2];
-            scene >> angle >> r[0] >> r[1] >> r[2];
-            scene >> t[0] >> t[1] >> t[2];
+            ss >> obj_name;
+            ss >> s[0] >> s[1] >> s[2];
+            ss >> angle >> r[0] >> r[1] >> r[2];
+            ss >> t[0] >> t[1] >> t[2];
             
-            mScale.push_back(Coord3<float>(s));
-            mRotate.push_back(Rotate(angle, Coord3<float>(r)));
-            mTransfer.push_back(Coord3<float>(t));
-            printf("scale: %F %f %f\n", mScale.back()[0], mScale.back()[1], mScale.back()[2]);
+            int id;
+            if ((id = getModelId(obj_name)) == -1)
+            {
+                cout << "get model id error" << endl;
+                system("pause");
+                exit(-1);
+            }
+
+            Model model(
+                id,
+                mType,
+                Rotate(angle, Coord3<float>(r)),
+                Coord3<float>(s),
+                Coord3<float>(t),
+                mFiles
+            );
+
+            mObjects.push_back(model);
             mNumOfObjs++;
         }
     }
     
-    cout << "Success" << endl;
     scene.close();
     return 0;
+}
+
+int SceneLoader::getModelId(string obj)
+{
+    for (size_t i = 0; i < files.fNames.size(); i++)
+    {
+        if (obj == files.fNames[i]) return i;
+    }
+
+    return -1;
 }
