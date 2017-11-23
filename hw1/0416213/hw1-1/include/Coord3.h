@@ -28,7 +28,7 @@ public:
         return *this;
     }
 
-    Coord3& operator+ (const Coord3 rhs)
+    Coord3 operator+ (const Coord3 rhs)
     {
         float ans[3];
         for (int i = 0; i < 3; i++)
@@ -36,7 +36,7 @@ public:
         return Coord3(ans);
     }
 
-    Coord3& operator- (const Coord3 rhs)
+    Coord3 operator- (const Coord3 rhs)
     {
         float ans[3];
         for (int i = 0; i < 3; i++)
@@ -75,7 +75,7 @@ public:
         return *this;
     }
 
-    Coord3d& operator+ (const Coord3 rhs)
+    Coord3d operator+ (const Coord3 rhs)
     {
         double ans[3];
         for (int i = 0; i < 3; i++)
@@ -83,7 +83,7 @@ public:
         return Coord3d(ans);
     }
 
-    Coord3d& operator- (const Coord3 rhs)
+    Coord3d operator- (const Coord3 rhs)
     {
         double ans[3];
         for (int i = 0; i < 3; i++)

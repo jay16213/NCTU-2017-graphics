@@ -15,11 +15,15 @@ class ViewLoader{
         ~ViewLoader();
         
         int loadView(string view_file);
-        
-        Coord3 mEye;
-        Coord3 mVat;
-        Coord3d mUnitVat;//unit vector of mVat
-        Coord3 mVup;
+        void updateUnitVat();
+        void updateDistance();
+
+        Coord3d mEye;
+        Coord3d mVat;
+        Coord3d mUnitVat;//unit vector which from eye to mVat
+        Coord3d mVup;
+        Coord3d mNormal;
+        double mDistance;
         double mFovy;
         double mDnear;
         double mDfar;

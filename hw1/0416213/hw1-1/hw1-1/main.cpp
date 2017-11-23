@@ -1,15 +1,17 @@
+#define _USE_MATH_DEFINES
 #include <iostream>
 #include <cstdlib>
 #include <cstring>
 #include <cstdio>
 #include <string>
+#include <cmath>
+#include <math.h>
 #include "glut.h"
 #include "mesh.h"
 #include "ViewLoader.h"
 #include "LightLoader.h"
 #include "SceneLoader.h"
 using namespace std;
-
 #define X 0
 #define Y 1
 #define Z 2
@@ -17,14 +19,12 @@ using namespace std;
 string srcRootPath("TestScene/");
 string box("box.obj"), venus("venus.obj"), bunny("bunny.obj");
 string redbox("redbox.obj"), yellowbox("yellowbox.obj"), bluebox("bluebox.obj");
-
 SceneLoader scene;
 ViewLoader view;
 LightLoader light;
 vector<mesh> objs;
-double zoomDegree = 0.0, dragDegree = 0.0;
+double zoomDegree = 0.0, dragDegree = 0.0, rDegree = M_PI / 180;
 int selectedObj = -1;
-
 
 void Display();
 void ReShape(int w, int h);
@@ -49,7 +49,8 @@ int main(int argc, char **argv)
             light.loadLight(srcRootPath + string("light.light"));
             view.loadView(srcRootPath + string("view.view"));
             zoomDegree = 20.0;
-            dragDegree = 1.0;
+            dragDegree = 0.8;
+            rDegree = M_PI / 120;
             window_size = 800;
             break;
         case 2:
@@ -87,8 +88,8 @@ int main(int argc, char **argv)
 
 void Display()
 {
-    //compute lighting of objs
-    lighting();
+    
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     //viewing and modeling transformation
     glMatrixMode(GL_MODELVIEW);
@@ -98,6 +99,9 @@ void Display()
         view.mVat[X], view.mVat[Y], view.mVat[Z],//center
         view.mVup[X], view.mVup[Y], view.mVup[Z] //up
     );
+
+    //compute lighting of objs
+    lighting();
 
     //projection transformation
     glMatrixMode(GL_PROJECTION);
@@ -166,13 +170,13 @@ void objViewTransform()
             scene.mTransfer[i][X],
             scene.mTransfer[i][Y],
             scene.mTransfer[i][Z]
-            );
+        );
         glRotatef(
             scene.mRotate[i].mAngle,
             scene.mRotate[i].mAxisVec[X],
             scene.mRotate[i].mAxisVec[Y],
             scene.mRotate[i].mAxisVec[Z]
-            );
+        );
         glScalef(scene.mScale[i][X], scene.mScale[i][Y], scene.mScale[i][Z]);
         renderObj(objs[i]);
         glPopMatrix();
@@ -183,10 +187,11 @@ void lighting()
 {
     //clear the buffer
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-    glClearDepth(1.0f);
+
+    glShadeModel(GL_SMOOTH);
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    
 
     //enable lighting
     glEnable(GL_LIGHTING);
@@ -194,7 +199,7 @@ void lighting()
     //set light property
     for (int i = 0; i < light.mObjLight.size(); i++)
     {
-        cout << "light " << i << endl;
+        //cout << "light " << i << endl;
         glEnable(GL_LIGHT0 + i);
         glLightfv(GL_LIGHT0 + i, GL_POSITION, light.mObjLight[i].mPosition);
         glLightfv(GL_LIGHT0 + i, GL_AMBIENT, light.mObjLight[i].mAmbient);
@@ -209,26 +214,90 @@ void lighting()
 
 void Keyboard(unsigned char key, int x, int y)
 {
+    double vat_x = view.mVat[X] - view.mEye[X];
+    double vat_y = view.mVat[Y] - view.mEye[Y];
+    double vat_z = view.mVat[Z] - view.mEye[Z];
+    double nx = view.mNormal[X], ny = view.mNormal[Y], nz = view.mNormal[Z];
+    double cosT = cos(rDegree), sinT = sin(rDegree);
+    double cost = cos(-rDegree), sint = sin(-rDegree);
+    double eye_x = view.mEye[X], eye_z = view.mEye[Z];
+
     switch (key)
     {
         case 'w'://zoom in
             view.mEye[X] += view.mUnitVat[X] * zoomDegree;
             view.mEye[Y] += view.mUnitVat[Y] * zoomDegree;
             view.mEye[Z] += view.mUnitVat[Z] * zoomDegree;
+            view.updateUnitVat();
+            view.updateDistance();
+            glutPostRedisplay();
             break;
+
         case 's'://zoom out
             view.mEye[X] -= view.mUnitVat[X] * zoomDegree;
             view.mEye[Y] -= view.mUnitVat[Y] * zoomDegree;
             view.mEye[Z] -= view.mUnitVat[Z] * zoomDegree;
+            view.updateUnitVat();
+            view.updateDistance();
+            glutPostRedisplay();
             break;
+
         case 'a'://move left (circle the center)
-            if (view.mVat[X] >= zoomDegree*100) view.mVat[X] = -zoomDegree*100;
-            view.mVat[X] += zoomDegree;
+            /*view.mVat[X] = (
+                ((cosT + pow(nx, 2.0)*(1 - cosT)) * vat_x) +
+                ((nx*ny*(1-cosT) - nz*sinT) * vat_y) + 
+                ((nx*nz*(1 - cosT) + ny*sinT) * vat_z)
+            );
+            view.mVat[Y] = (
+                ((ny*nx*(1-cosT) + nz*sinT) * vat_x) +
+                ((cosT + pow(ny, 2.0)*(1-cosT)) * vat_y) +
+                ((ny*nz*(1-cosT) - nx*sinT) * vat_z)
+            );
+            view.mVat[Z] = (
+                ((nz*nx*(1-cosT) - ny*sinT) * vat_x) +
+                ((nz*ny*(1-cosT) + nx*sinT) * vat_y) +
+                ((cosT + pow(nz, 2.0)*(1-cosT)) * vat_z)
+            );*/
+
+            view.mEye[X] = cos(rDegree)*eye_x - sin(rDegree)*eye_z;
+            view.mEye[Z] = sin(rDegree)*eye_x + cos(rDegree)*eye_z;
+
+            view.updateUnitVat();
+            //view.updateDistance();
+            printf("dis: %f\n", view.mDistance);
+            printf("Vat: %f %f %f\n", view.mVat[X], view.mVat[Y], view.mVat[Z]);
+            glutPostRedisplay();
+
             break;
+
         case 'd'://move right (circle the center)
-            if (view.mVat[X] <= -zoomDegree*100) view.mVat[X] = zoomDegree*100;
-            view.mVat[X] -= zoomDegree;
+            /*view.mVat[X] = (
+                ((cost + pow(nx, 2.0)*(1 - cost)) * vat_x) +
+                ((nx*ny*(1 - cost) - nz*sint) * vat_y) +
+                ((nx*nz*(1 - cost) + ny*sint) * vat_z)
+            );
+            view.mVat[Y] = (
+                ((ny*nx*(1 - cost) + nz*sint) * vat_x) +
+                ((cost + pow(ny, 2.0)*(1 - cost)) * vat_y) +
+                ((ny*nz*(1 - cost) - nx*sint) * vat_z)
+            );
+            view.mVat[Z] = (
+                ((nz*nx*(1 - cost) - ny*sint) * vat_x) +
+                ((nz*ny*(1 - cost) + nx*sint) * vat_y) +
+                ((cost + pow(nz, 2.0)*(1 - cost)) * vat_z)
+            );*/
+
+            view.mEye[X] = cos(-rDegree)*eye_x - sin(-rDegree)*eye_z;
+            view.mEye[Z] = sin(-rDegree)*eye_x + cos(-rDegree)*eye_z;
+
+            view.updateUnitVat();
+            //view.updateDistance();
+            printf("dis: %f\n", view.mDistance);
+            printf("Vat: %f %f %f\n", view.mVat[X], view.mVat[Y], view.mVat[Z]);
+            glutPostRedisplay();
+
             break;
+
         case '1':
             selectedObj = 0;
             break;
@@ -258,7 +327,6 @@ void Keyboard(unsigned char key, int x, int y)
             break;
     }
 
-    glutPostRedisplay();
     return;
 }
 

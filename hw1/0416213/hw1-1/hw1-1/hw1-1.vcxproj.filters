@@ -47,5 +47,8 @@
     <ClInclude Include="..\include\Coord3.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="parameters.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
