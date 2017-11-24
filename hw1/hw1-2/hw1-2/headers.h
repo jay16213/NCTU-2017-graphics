@@ -26,10 +26,20 @@ using namespace std;
 
 void Display();
 void ReShape(int w, int h);
-void renderObj(mesh obj, int index);
 void objViewTransform();
 void lighting();
-void loadTexture(Model model, int texObjIndex, int textureType);
+
+void loadTexture(Texture *tex, unsigned int *texObj, int *texObjIndex);
+void loadSingleTexture(Texture *tex, unsigned int *texObj, int *texObjIndex);
+void loadMultiTexture(Texture *tex, unsigned int *texObj, int *texObjIndex);
+void loadCubeMapTexture(Texture *tex, unsigned int *texObj, int *texObjIndex);
+
+void renderObj(mesh obj, unsigned int *texObj, int texType, int texObjIndex);
+void renderWithNoTex(mesh obj);
+void renderWithSingleTex(mesh obj, unsigned int *texObj, int texType, int texObjIndex);
+void renderWithMultiTex(mesh obj, unsigned int *texObj, int texType, int texObjIndex);
+void renderWithCubeMap(mesh obj, unsigned int *texObj, int texType, int texObjIndex);
+
 void Keyboard(unsigned char key, int x, int y);
 void Mouse(int button, int state, int x, int y);
 

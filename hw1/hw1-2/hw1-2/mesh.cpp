@@ -5,20 +5,20 @@
 #include "mesh.h"
 #include <iostream>
 
-const char* obj_database = "TestScene/";	// 定義 mesh 的預設目錄
-
+const char* obj_database1 = "Park/";	// 定義 mesh 的預設目錄
+const char* obj_database2 = "Chess/";
 using namespace std;
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-mesh::mesh(string obj_file)
+mesh::mesh(string obj_file, int testScene)
 {
 	mTotal = 0;		// mList[0] reserved for default meterial
 	vTotal = tTotal = nTotal = fTotal = 0;
 	
-	Init(obj_file);
+    Init(obj_file, testScene);
 }
 
 mesh::mesh()
@@ -31,7 +31,7 @@ mesh::~mesh()
 {
 }
 
-void mesh::LoadMesh(string obj_file)
+void mesh::LoadMesh(string obj_file, int testScene)
 {
 	FILE	*scene;
 	char	token[100], buf[100], v[5][100];	// v[5] 表示一個 polygon 最多可以有 5個 vertex
@@ -66,7 +66,10 @@ void mesh::LoadMesh(string obj_file)
 			char mat_file[256];
 			matFile = mat_file;
   			fscanf(scene,"%s", mat_file);
-			LoadMtl(string(obj_database) + string(mat_file));
+            if (testScene == 1)
+			    LoadMtl(string(obj_database1) + string(mat_file));
+            else
+                LoadMtl(string(obj_database2) + string(mat_file));
 		}
 
 		else if (!strcmp(token,"usemtl"))
@@ -269,7 +272,7 @@ void mesh::LoadMtl(string tex_file)
 	if (fp_mtl) fclose(fp_mtl);
 }
 
-void mesh::Init(string obj_file)
+void mesh::Init(string obj_file, int testScene)
 {
 	float default_value[3] = {1,1,1};
 
@@ -286,6 +289,6 @@ void mesh::Init(string obj_file)
 	mList[0].Ns = 32.0f;
 	mTotal++;
 
-	LoadMesh(string(obj_file));		// 讀入 .obj 檔 (可處理 Material)
+    LoadMesh(string(obj_file), testScene);		// 讀入 .obj 檔 (可處理 Material)
 }
 

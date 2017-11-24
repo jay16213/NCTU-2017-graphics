@@ -9,7 +9,6 @@ double zoomDegree = 0.0, dragDegree = 0.0, rotateDegree = M_PI / 180;
 int selectedObj = -1;
 
 int numOfTextures;
-unsigned int *texObjs;
 
 Srcpath files;
 
@@ -24,24 +23,24 @@ int main(int argc, char **argv)
     {
         case 1:
             for (int i = 0; i < 9; i++)
-                objs.insert(pair<int, mesh>(i, files.srcRootPath_park + files.oNames[i]));
+                objs.insert(pair<int, mesh>(i, mesh(files.srcRootPath_park + files.oNames[i], res)));
+
             light.loadLight(files.srcRootPath_park + string("park.light"));
             scene.loadScene(files.srcRootPath_park + string("park.scene"));
             view.loadView(files.srcRootPath_park + string("park.view"));
-            numOfTextures = 16;
-            texObjs = new unsigned int[numOfTextures];
+
             zoomDegree = 20.0;
             dragDegree = 0.8;
             break;
 
         case 2:
             for (int i = 9; i < 17; i++)
-                objs.insert(pair<int, mesh>(i, files.srcRootPath_chess + files.oNames[i]));
+                objs.insert(pair<int, mesh>(i, mesh(files.srcRootPath_chess + files.oNames[i], res)));
+
             light.loadLight(files.srcRootPath_chess + string("Chess.light"));
             scene.loadScene(files.srcRootPath_chess + string("Chess.scene"));
             view.loadView(files.srcRootPath_chess + string("Chess.view"));
-            numOfTextures = 16;
-            texObjs = new unsigned int[numOfTextures];
+
             zoomDegree = 0.1;
             dragDegree = 50.0;
             break;
@@ -56,18 +55,19 @@ int main(int argc, char **argv)
     glutInitWindowPosition(0, 0);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
     glutCreateWindow("HW1-2");
+    glewInit();
     glutDisplayFunc(Display);
     glutReshapeFunc(ReShape);
     glutKeyboardFunc(Keyboard);
     glutMouseFunc(Mouse);
     glutMainLoop();
-    delete []texObjs;
     return 0;
 }
 
 void Display()
 {
-    //clear buffer
+    //clear the buffer
+    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     //viewing and modeling transformation
@@ -100,13 +100,7 @@ void Display()
 
 void lighting()
 {
-    //clear the buffer
-    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-
     glShadeModel(GL_SMOOTH);
-    glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LEQUAL);
-
 
     //enable lighting
     glEnable(GL_LIGHTING);
@@ -128,71 +122,53 @@ void lighting()
 
 void objViewTransform()
 {
-    for (int i = 0; i < scene.mNumOfObjs; i++)
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LEQUAL);
+    unsigned int *texObj;
+    texObj = new unsigned int[scene.mNumOfTextures];
+    glGenTextures(scene.mNumOfTextures, texObj);
+    int texObjIndex = 0;
+
+    for (int i = 0; i < scene.mComponents.size(); i++)
     {
-        glPushMatrix();
-        glTranslatef(
-            scene.mModels[i].mTransfer[X],
-            scene.mModels[i].mTransfer[Y],
-            scene.mModels[i].mTransfer[Z]
-        );
-        glRotatef(
-            scene.mModels[i].mRotate.mAngle,
-            scene.mModels[i].mRotate.mAxisVec[X],
-            scene.mModels[i].mRotate.mAxisVec[Y],
-            scene.mModels[i].mRotate.mAxisVec[Z]
-        );
-        glScalef(
-            scene.mModels[i].mScale[X],
-            scene.mModels[i].mScale[Y],
-            scene.mModels[i].mScale[Z]
-        );
+        Texture tex = scene.mComponents[i].mTex;
         
-        renderObj(objs[scene.mModels[i].mId], i);
+        //prepare texture
+        int index = texObjIndex;
+        FreeImage_Initialise();
+        loadTexture(&tex, texObj, &texObjIndex);
+        FreeImage_DeInitialise();
 
-        glPopMatrix();
-    }
-}
-
-void renderObj(mesh obj, int index)
-{
-    int lastMaterial = -1;
-    for (size_t i = 0; i < obj.fTotal; ++i)
-    {
-        // set material property if this face used different material
-        if (lastMaterial != obj.faceList[i].m)
+        for (int j = 0; j < scene.mComponents[i].mNumOfModels; j++)
         {
-            lastMaterial = (int)obj.faceList[i].m;
-            glMaterialfv(GL_FRONT, GL_AMBIENT, obj.mList[lastMaterial].Ka);
-            glMaterialfv(GL_FRONT, GL_DIFFUSE, obj.mList[lastMaterial].Kd);
-            glMaterialfv(GL_FRONT, GL_SPECULAR, obj.mList[lastMaterial].Ks);
-            glMaterialfv(GL_FRONT, GL_SHININESS, &obj.mList[lastMaterial].Ns);
-        }
+            Model model = scene.mComponents[i].mModels[j];
+            cout << "render " << files.oNames[model.mObjIndex] << endl;
 
-        glBegin(GL_TRIANGLES);
-        for (size_t j = 0; j<3; ++j)
-        {
-            //textex corrd. object->tList[object->faceList[i][j].t].ptr          
-            glNormal3fv(obj.nList[obj.faceList[i][j].n].ptr);
-            glVertex3fv(obj.vList[obj.faceList[i][j].v].ptr);
-        }
-        glEnd();
+            glPushMatrix();
+            glTranslatef(
+                model.mTransfer[X],
+                model.mTransfer[Y],
+                model.mTransfer[Z]
+                );
+            glRotatef(
+                model.mAngle,
+                model.mRotateAxisVec[X],
+                model.mRotateAxisVec[Y],
+                model.mRotateAxisVec[Z]
+                );
+            glScalef(
+                model.mScale[X],
+                model.mScale[Y],
+                model.mScale[Z]
+                );
+
+            renderObj(objs[model.mObjIndex], texObj, tex.mType, index);
+
+            glPopMatrix();
+        } 
     }
-}
-
-void loadSingleTexture(Model model, int texObjIndex)
-{
-    return;
-}
-
-void loadMultiTexture()
-{
-
-}
-
-void loadCubeMapTexture()
-{
-
+    glDeleteTextures(scene.mNumOfTextures, texObj);
+    delete[]texObj;
 }
 
 void ReShape(int w, int h)
@@ -303,8 +279,8 @@ void Mouse(int button, int state, int x, int y)
         if (selectedObj >= 0)
         {
             printf("move: %d %d\n", x - last_x, y - last_y);
-            scene.mModels[selectedObj].mTransfer[X] += (double)((x - last_x) / dragDegree);
-            scene.mModels[selectedObj].mTransfer[Y] -= (double)((y - last_y) / dragDegree);
+            //scene.mModels[selectedObj].mTransfer[X] += (double)((x - last_x) / dragDegree);
+            //scene.mModels[selectedObj].mTransfer[Y] -= (double)((y - last_y) / dragDegree);
         }
         break;
 

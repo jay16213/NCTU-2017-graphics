@@ -74,19 +74,22 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="LightLoader.cpp" />
+    <ClCompile Include="loadTexture.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="mesh.cpp" />
+    <ClCompile Include="render.cpp" />
     <ClCompile Include="SceneLoader.cpp" />
     <ClCompile Include="ViewLoader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Coord3.h" />
+    <ClInclude Include="Model.h" />
     <ClInclude Include="Srcpath.h" />
     <ClInclude Include="headers.h" />
     <ClInclude Include="LightLoader.h" />
     <ClInclude Include="mesh.h" />
     <ClInclude Include="SceneLoader.h" />
-    <ClInclude Include="TextureLoader.h" />
+    <ClInclude Include="Texture.h" />
     <ClInclude Include="ViewLoader.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
