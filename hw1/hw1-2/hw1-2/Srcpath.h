@@ -22,6 +22,7 @@ public:
         oNames.push_back(string("groundv2.obj"));
         oNames.push_back(string("littlefountain.obj"));
         
+        tNames.push_back(string("bush.tga"));
         tNames.push_back(string("EnvXn.bmp"));
         tNames.push_back(string("EnvXp.bmp"));
         tNames.push_back(string("EnvYn.bmp"));
@@ -51,12 +52,12 @@ public:
         tNames.push_back(string("Grid.bmp"));
         tNames.push_back(string("Room.bmp"));
         tNames.push_back(string("Wood.bmp"));
-        tNames.push_back(string("Env_positive_x"));
-        tNames.push_back(string("Env_negative_x"));
-        tNames.push_back(string("Env_positive_y"));
-        tNames.push_back(string("Env_negative_y"));
-        tNames.push_back(string("Env_positive_z"));
-        tNames.push_back(string("Env_negative_z"));
+        tNames.push_back(string("Env_positive_x.bmp"));
+        tNames.push_back(string("Env_negative_x.bmp"));
+        tNames.push_back(string("Env_positive_y.bmp"));
+        tNames.push_back(string("Env_negative_y.bmp"));
+        tNames.push_back(string("Env_positive_z.bmp"));
+        tNames.push_back(string("Env_negative_z.bmp"));
     }
     ~Srcpath() {}
 

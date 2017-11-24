@@ -8,17 +8,16 @@
 #include <cstdio>
 #include <string>
 #include <math.h>
-#include <map>
 #include <cmath>
+#include <map>
+#include "FreeImage.h"
 #include "glew.h"
 #include "glut.h"
-#include "FreeImage.h"
-#include "mesh.h"
-#include "ViewLoader.h"
 #include "LightLoader.h"
 #include "SceneLoader.h"
-#include "pipeline.h"
+#include "ViewLoader.h"
 #include "Srcpath.h"
+#include "mesh.h"
 using namespace std;
 
 #define X 0
@@ -30,7 +29,7 @@ void ReShape(int w, int h);
 void renderObj(mesh obj, int index);
 void objViewTransform();
 void lighting();
-void loadTexture();
+void loadTexture(Model model, int texObjIndex, int textureType);
 void Keyboard(unsigned char key, int x, int y);
 void Mouse(int button, int state, int x, int y);
 

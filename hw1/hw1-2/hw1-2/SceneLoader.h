@@ -10,9 +10,6 @@
 #include <string>
 #include <vector>
 #include <map>
-#include "glew.h"
-#include "glut.h"
-#include "FreeImage.h"
 #include "Coord3.h"
 #include "Srcpath.h"
 using namespace std;
@@ -22,29 +19,6 @@ using namespace std;
 #define SINGLE_TEXTURE      1
 #define MULTI_TEXTURE       2
 #define CUBE_MAP            3
-
-//park
-#define GEM                 0
-#define BRUSH               1
-#define TRUNK               2
-#define WATER               3
-#define HEDGE               4
-#define LEAVES              5
-#define SKYBOX              6
-#define GROUNDV2            7
-#define LITTLE_FOUNTAIN     8
-
-
-//chess
-#define ROOK                9
-#define ROOM               10
-#define KING               11
-#define PAWN               12
-#define QUEEN              13
-#define KNIGHT             14
-#define BISHOP             15
-#define CHESSBOARD         16
-
 
 class Rotate
 {
@@ -102,13 +76,11 @@ public:
     Texture(int type, int imgIndex)
     {
         mType = type;
-        //mNumOfFiles = files.size();
         mImgIndex = imgIndex;
     }
     ~Texture() {}
 
     int mType;
-    //int mNumOfFiles;
     int mImgIndex;
 };
 
@@ -119,7 +91,6 @@ public:
     ~SceneLoader();
 
     int loadScene(string scene_file);
-    void loadTexture();
 
     int mNumOfObjs;
     int mNumOfTextures;

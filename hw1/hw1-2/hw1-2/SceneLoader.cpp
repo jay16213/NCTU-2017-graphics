@@ -15,7 +15,7 @@ int SceneLoader::loadScene(string scene_file)
     
     
     string line, param_name;
-    int type;
+    int texType, start = 0;
     while(getline(scene, line))
     {
         stringstream ss(line);
@@ -23,23 +23,21 @@ int SceneLoader::loadScene(string scene_file)
 
         if (param_name == "no-texture")
         {
-            mType = NO_TEXTURE;
+            texType = NO_TEXTURE;
         }
         else if (param_name == "single-texture")
         {
-            mType = SINGLE_TEXTURE;
+            texType = SINGLE_TEXTURE;
 
             string file;
-            while (ss >> file)
-            {
-                int id = getImgFileId(file);
-                mTexObjs.push_back(Texture(SINGLE_TEXTURE, id));
-                mNumOfTextures++;
-            }
+            ss >> file;
+            int id = getImgFileId(file);
+            mTexObjs.push_back(Texture(SINGLE_TEXTURE, id));
+            mNumOfTextures++;
         }
         else if (param_name == "multi-texture")
         {
-            mType = MULTI_TEXTURE;
+            texType = MULTI_TEXTURE;
 
             string file;
             while (ss >> file)
@@ -51,14 +49,13 @@ int SceneLoader::loadScene(string scene_file)
         }
         else if (param_name == "cube-map")
         {
-            mType = CUBE_MAP;
-
+            texType = CUBE_MAP;
+            mNumOfTextures++;
             string file;
             while (ss >> file)
             {
                 int id = getImgFileId(file);
                 mTexObjs.push_back(Texture(CUBE_MAP, id));
-                mNumOfTextures++;
             }
         }
         else if(param_name == "model")
@@ -72,59 +69,26 @@ int SceneLoader::loadScene(string scene_file)
             ss >> t[0] >> t[1] >> t[2];
             
             int id = getObjId(obj_name);
+            vector<int> texObjIndex;
+            for (int i = start; i < mNumOfTextures; i++) texObjIndex.push_back(i);
 
             Model model(
                 id,
-                mType,
+                texType,
                 Rotate(angle, Coord3<float>(r)),
                 Coord3<float>(s),
                 Coord3<float>(t),
-                
+                texObjIndex
             );
 
-            mObjects.push_back(model);
+            mModels.push_back(model);
             mNumOfObjs++;
+            start = mNumOfTextures;
         }
     }
     
     scene.close();
     return 0;
-}
-
-void SceneLoader::loadTexture()
-{
-    mTexObjects = new unsigned int[mNumOfTextures];
-
-    FreeImage_Initialise();
-    
-    //generate the texture objects
-    glGenTextures(mNumOfTextures, mTexObjects);
-
-    //load the img files and bind them to the texture objects
-    for (int i = 0; i < mNumOfTextures; i++)
-    {
-        switch (mTexFiles[i].mType)
-        {
-            case SIG
-        }
-        FIBITMAP *pImg = FreeImage_Load(FreeImage_GetFileType(imgFilename, 0), imgFilename);
-        FIBITMAP *p32BitsImg = FreeImage_ConvertTo32Bits(pImg);
-        int width = FreeImage_GetWidth(p32BitsImg);
-        int height = FreeImage_GetHeight(p32BitsImg);
-        
-        glBindTexture(GL_TEXTURE_2D, texObjs);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0,
-            GL_BGRA, GL_UNSIGNED_BYTE, (void *)FreeImage_GetBits(p32BitsImg));
-        glGenerateMipmap(GL_TEXTURE_2D);
-        glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
-
-        FreeImage_Unload(p32BitsImg);
-        FreeImage_Unload(pImg);
-    }
-    FreeImage_DeInitialise();
-    return;
 }
 
 int SceneLoader::getObjId(string obj)
