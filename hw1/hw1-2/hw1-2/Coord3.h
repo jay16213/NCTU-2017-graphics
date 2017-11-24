@@ -57,4 +57,22 @@ public:
     }
 };
 
+class Coord3f : public Coord3<float>
+{
+public:
+    Coord3f() {}
+    Coord3f(float c1, float c2, float c3) : Coord3<float>(c1, c2, c3) {}
+    Coord3f(float *p) : Coord3<float>(p) {}
+    ~Coord3f();
+};
+
+class Coord3d : public Coord3<double>
+{
+public:
+    Coord3d();
+    Coord3d(double c1, double c2, double c3) : Coord3<double>(c1, c2, c3) {}
+    Coord3d(double *p) : Coord3<double>(p) {}
+    ~Coord3d();
+};
+
 #endif
