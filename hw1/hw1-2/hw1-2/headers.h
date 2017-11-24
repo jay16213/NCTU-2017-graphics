@@ -27,9 +27,10 @@ using namespace std;
 
 void Display();
 void ReShape(int w, int h);
-void renderObj(mesh obj);
+void renderObj(mesh obj, int index);
 void objViewTransform();
 void lighting();
+void loadTexture();
 void Keyboard(unsigned char key, int x, int y);
 void Mouse(int button, int state, int x, int y);
 

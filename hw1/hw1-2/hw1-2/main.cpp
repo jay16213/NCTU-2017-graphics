@@ -8,6 +8,8 @@ map<int, mesh> objs;
 double zoomDegree = 0.0, dragDegree = 0.0, rotateDegree = M_PI / 180;
 int selectedObj = -1;
 
+int numOfTextures;
+unsigned int *texObjs;
 
 int main(int argc, char **argv)
 {   
@@ -24,6 +26,9 @@ int main(int argc, char **argv)
             light.loadLight(files.srcRootPath_park + string("park.light"));
             scene.loadScene(files.srcRootPath_park + string("park.scene"));
             view.loadView(files.srcRootPath_park + string("park.view"));
+            numOfTextures = 15;
+            texObjs = new unsigned int[numOfTextures];
+            FreeImage_Initialise();
             zoomDegree = 20.0;
             dragDegree = 0.8;
             break;
@@ -47,7 +52,7 @@ int main(int argc, char **argv)
     glutInit(&argc, argv);
     glutInitWindowSize(800, 600);
     glutInitWindowPosition(0, 0);
-    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
+    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
     glutCreateWindow("HW1-2");
     glutDisplayFunc(Display);
     glutReshapeFunc(ReShape);
@@ -139,12 +144,12 @@ void objViewTransform()
             scene.mObjects[i].mScale[Y],
             scene.mObjects[i].mScale[Z]
         );
-        renderObj(objs[scene.mObjects[i].mId]);
+        renderObj(objs[scene.mObjects[i].mId], i);
         glPopMatrix();
     }
 }
 
-void renderObj(mesh obj)
+void renderObj(mesh obj, int index)
 {
     int lastMaterial = -1;
     for (size_t i = 0; i < obj.fTotal; ++i)
@@ -159,15 +164,144 @@ void renderObj(mesh obj)
             glMaterialfv(GL_FRONT, GL_SHININESS, &obj.mList[lastMaterial].Ns);
         }
 
+        switch (scene.mObjects[index].mTextureType)
+        {
+            case NO_TEXTURE:
+                break;
+            case SINGLE_TEXTURE:
+                glEnable(GL_TEXTURE_2D);
+                glBindTexture(GL_TEXTURE_2D, texObjs[scene.mObjects[index].mTexObjIndex]);
+                glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+                break;
+            case MULTI_TEXTURE:
+                glActiveTexture(GL_TEXTURE0);
+                glEnable(GL_TEXTURE_2D);
+                glBindTexture(GL_TEXTURE_2D, texObjs[scene.mObjects[index].mTexObjIndex]);
+                glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE);
+                glTexEnvf(GL_TEXTURE_ENV, GL_COMBINE_RGB, GL_MODULATE);
+
+                glActiveTexture(GL_TEXTURE1);
+                glEnable(GL_TEXTURE_2D);
+                glBindTexture(GL_TEXTURE_2D, texObjs[scene.mObjects[index].mTexObjIndex]);
+                glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE);
+                glTexEnvf(GL_TEXTURE_ENV, GL_COMBINE_RGB, GL_MODULATE);
+                break;
+            case CUBE_MAP:
+                glTexGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_REFLECTION_MAP);
+                glTexGeni(GL_T, GL_TEXTURE_GEN_MODE, GL_REFLECTION_MAP);
+                glTexGeni(GL_R, GL_TEXTURE_GEN_MODE, GL_REFLECTION_MAP);
+                glEnable(GL_TEXTURE_GEN_S);
+                glEnable(GL_TEXTURE_GEN_T);
+                glEnable(GL_TEXTURE_GEN_R);
+                glEnable(GL_TEXTURE_CUBE_MAP);
+                glBindTexture(GL_TEXTURE_CUBE_MAP, texObjs[scene.mObjects[index].mTexObjIndex]);
+                break;
+        }
+
         glBegin(GL_TRIANGLES);
         for (size_t j = 0; j<3; ++j)
         {
             //textex corrd. object->tList[object->faceList[i][j].t].ptr
+            if (scene.mObjects[index].mTextureType == SINGLE_TEXTURE)
+            {
+                glTexCoord2fv(obj.tList[obj.faceList[i][j].t].ptr);
+            }
+            else if (scene.mObjects[index].mTextureType == MULTI_TEXTURE)
+            {
+                for (int k = 0; k < scene.mTexFiles[scene.mObjects[index].mTexObjIndex].mNumOfFiles; k++)
+                    glMultiTexCoord2fv(GL_TEXTURE0 + k, obj.tList[obj.faceList[i][j].t].ptr);             
+            }
+            
             glNormal3fv(obj.nList[obj.faceList[i][j].n].ptr);
             glVertex3fv(obj.vList[obj.faceList[i][j].v].ptr);
         }
         glEnd();
     }
+}
+
+void loadTexture(int texObjIndex, int textureType)
+{
+    FIBITMAP *pImg;
+    FIBITMAP *p32BitsImg;
+    int width;
+    int height;
+
+    switch (textureType)
+    {
+        case SINGLE_TEXTURE:
+            glBindTexture(GL_TEXTURE_2D, texObjs[texObjIndex]);
+
+            pImg = FreeImage_Load(
+                FreeImage_GetFileType(scene.mTexFiles[texObjIndex].mFiles[0].c_str(), 0),
+                scene.mTexFiles[texObjIndex].mFiles[0].c_str()
+            );
+            p32BitsImg = FreeImage_ConvertTo32Bits(pImg);
+            width = FreeImage_GetWidth(p32BitsImg);
+            height = FreeImage_GetHeight(p32BitsImg);
+
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0,
+                GL_BGRA, GL_UNSIGNED_BYTE, (void *) FreeImage_GetBits(p32BitsImg));
+            
+            glEnable(GL_ALPHA_TEST);
+            glAlphaFunc(GL_GREATER, 0.5f);
+
+            glGenerateMipmap(GL_TEXTURE_2D);
+            glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
+
+            FreeImage_Unload(p32BitsImg);
+            FreeImage_Unload(pImg);
+            break;
+
+        case MULTI_TEXTURE:
+            glBindTexture(GL_TEXTURE_2D, texObjs[texObjIndex]);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            for (size_t i = 0; i < scene.mTexFiles[texObjIndex].mFiles.size(); i++)
+            {
+                pImg = FreeImage_Load(
+                    FreeImage_GetFileType(scene.mTexFiles[texObjIndex].mFiles[i].c_str(), 0),
+                    scene.mTexFiles[texObjIndex].mFiles[i].c_str()
+                    );
+                p32BitsImg = FreeImage_ConvertTo32Bits(pImg);
+                width = FreeImage_GetWidth(p32BitsImg);
+                height = FreeImage_GetHeight(p32BitsImg);
+
+                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0,
+                    GL_BGRA, GL_UNSIGNED_BYTE, (void *)FreeImage_GetBits(p32BitsImg));
+                FreeImage_Unload(p32BitsImg);
+                FreeImage_Unload(pImg);
+            }
+            glGenerateMipmap(GL_TEXTURE_2D);
+            glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
+            break;
+
+        case CUBE_MAP:
+            glBindTexture(GL_TEXTURE_CUBE_MAP, texObjs[texObjIndex]);
+            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            for (size_t i = 0; i < scene.mTexFiles[texObjIndex].mFiles.size(); i++)
+            {
+                pImg = FreeImage_Load(
+                    FreeImage_GetFileType(scene.mTexFiles[texObjIndex].mFiles[i].c_str(), 0),
+                    scene.mTexFiles[texObjIndex].mFiles[i].c_str()
+                    );
+                p32BitsImg = FreeImage_ConvertTo32Bits(pImg);
+                width = FreeImage_GetWidth(p32BitsImg);
+                height = FreeImage_GetHeight(p32BitsImg);
+                
+                glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGBA8, width, height, 0,
+                    GL_BGRA, GL_UNSIGNED_BYTE, (void *)FreeImage_GetBits(p32BitsImg));
+
+                FreeImage_Unload(p32BitsImg);
+                FreeImage_Unload(pImg);
+            }
+            glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
+            break;
+    }
+
+    return;
 }
 
 void ReShape(int w, int h)

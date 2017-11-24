@@ -10,6 +10,9 @@
 #include <string>
 #include <vector>
 #include <map>
+#include "glew.h"
+#include "glut.h"
+#include "FreeImage.h"
 #include "Coord3.h"
 #include "Srcpath.h"
 using namespace std;
@@ -75,23 +78,38 @@ public:
         Rotate r,
         Coord3<float> s,
         Coord3<float> t,
-        vector<string> files)
+        vector<int> texObjIndex)
     {
         mId = id;
         mTextureType = type;
         mRotate = r;
         mScale = s;
         mTransfer = t;
-        mImgFiles.assign(files.begin(), files.end());
+        mTexObjIndex.assign(texObjIndex.begin(), texObjIndex.end());
     }
     ~Model() {}
 
     int mId;
     int mTextureType;
-    vector<string> mImgFiles;
+    vector<int> mTexObjIndex;
     Rotate mRotate;
     Coord3<float> mScale;
     Coord3<float> mTransfer;
+};
+
+class Texture{
+public:
+    Texture(int type, int imgIndex)
+    {
+        mType = type;
+        //mNumOfFiles = files.size();
+        mImgIndex = imgIndex;
+    }
+    ~Texture() {}
+
+    int mType;
+    //int mNumOfFiles;
+    int mImgIndex;
 };
 
 class SceneLoader
@@ -101,15 +119,16 @@ public:
     ~SceneLoader();
 
     int loadScene(string scene_file);
+    void loadTexture();
 
     int mNumOfObjs;
-    vector<Model> mObjects;
-
+    int mNumOfTextures;
+    vector<Model> mModels;
+    vector<Texture> mTexObjs;
 private:
-    int getModelId(string obj);
-    vector<string> mFiles;
+    int getObjId(string obj);
+    int getImgFileId(string tex);
     Srcpath files;
-    int mType;
 };
 
 #endif

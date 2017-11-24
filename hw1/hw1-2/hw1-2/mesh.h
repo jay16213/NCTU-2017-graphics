@@ -97,7 +97,7 @@ public:
 
 	std::string					matFile;
 
-	size_t						mTotal;	// total material 
+	size_t						mTotal;	    // total material 
 	std::map<std::string,size_t>matMap;		// matMap[material_name] = material_ID
 	std::vector<material>		mList;		// material ID (每個 mesh 最多有 100 種 material)	
 
