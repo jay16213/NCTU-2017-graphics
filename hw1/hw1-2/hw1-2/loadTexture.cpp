@@ -1,6 +1,6 @@
 #include "headers.h"
 
-Srcpath tFile;
+extern Srcpath files;
 
 void loadTexture(Texture *tex, unsigned int *texObj, int *texObjIndex)
 {
@@ -23,7 +23,7 @@ void loadTexture(Texture *tex, unsigned int *texObj, int *texObjIndex)
 
 void loadSingleTexture(Texture *tex, unsigned int *texObj, int *texObjIndex)
 {
-    string imgFilename = tFile.tNames[tex->mImgIndex[0]].c_str();
+    string imgFilename = files.tNames[tex->mImgIndex[0]].c_str();
     FIBITMAP *pImg = FreeImage_Load(FreeImage_GetFileType(imgFilename.c_str(), 0), imgFilename.c_str());
     FIBITMAP *p32BitsImg = FreeImage_ConvertTo32Bits(pImg);
     int width = FreeImage_GetWidth(p32BitsImg);
@@ -52,7 +52,7 @@ void loadMultiTexture(Texture *tex, unsigned int *texObj, int *texObjIndex)
 {
     for (size_t i = 0; i < tex->mNumOfTextures; i++)
     {
-        string imgFilename = tFile.tNames[tex->mImgIndex[i]].c_str();
+        string imgFilename = files.tNames[tex->mImgIndex[i]].c_str();
         FIBITMAP *pImg = FreeImage_Load(FreeImage_GetFileType(imgFilename.c_str(), 0), imgFilename.c_str());
         FIBITMAP *p32BitsImg = FreeImage_ConvertTo32Bits(pImg);
         int width = FreeImage_GetWidth(p32BitsImg);
@@ -83,7 +83,7 @@ void loadCubeMapTexture(Texture *tex, unsigned int *texObj, int *texObjIndex)
     int width[6], height[60];
     for (int i = 0; i < 6; i++)
     {
-        string imgFilename = tFile.tNames[tex->mImgIndex[i]];
+        string imgFilename = files.tNames[tex->mImgIndex[i]];
         pImg[i] = FreeImage_Load(FreeImage_GetFileType(imgFilename.c_str(), 0), imgFilename.c_str());
         p32BitsImg[i] = FreeImage_ConvertTo32Bits(pImg[i]);
         width[i] = FreeImage_GetWidth(p32BitsImg[i]);
@@ -102,9 +102,9 @@ void loadCubeMapTexture(Texture *tex, unsigned int *texObj, int *texObjIndex)
     }
     glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
 
-    glGenerateMipmap(GL_TEXTURE_2D);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 1000);
+    glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_BASE_LEVEL, 0);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_BASE_LEVEL, 1000);
 
     for (int i = 0; i < 6; i++)
     {
