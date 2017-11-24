@@ -16,6 +16,7 @@ public:
     Texture(int type, std::vector<int> imgIndex)
     {
         mType = type;
+        mNumOfTextures = imgIndex.size();
         mImgIndex.assign(imgIndex.begin(), imgIndex.end());
     }
     ~Texture() {}
@@ -24,10 +25,12 @@ public:
     {
         mType = rhs.mType;
         mImgIndex.assign(rhs.mImgIndex.begin(), rhs.mImgIndex.end());
+        mNumOfTextures = rhs.mNumOfTextures;
         return *this;
     }
 
-    int mType;             //texture type(4 types)
+    int mType;                  //texture type(4 types)
+    int mNumOfTextures;
     std::vector<int> mImgIndex; //the set of indexes to find the image filename
 };
 

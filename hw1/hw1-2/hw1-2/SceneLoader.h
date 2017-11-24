@@ -16,7 +16,7 @@
 #include "Model.h"
 using namespace std;
 
-//a component is composed of one texture and multi model
+//a component is composed of one texture and multi model,
 //where the texture has 4 types(no, single, multi, cube map)
 class Component
 {
@@ -26,14 +26,16 @@ public:
     {
         mTex = tex;
         mModels.assign(models.begin(), models.end());
+        mNumOfModels = mModels.size();
     }
     ~Component() {}
 
-    Texture mTex;          // one texture
-    vector<Model> mModels;  // multi model
+    Texture mTex;           // one texture
+    int mNumOfModels;       // number of models
+    vector<Model> mModels;  // multi models
 };
 
-// the whole is composed of many component
+// the whole scene is composed of many components
 class SceneLoader
 {
 public:
@@ -41,6 +43,8 @@ public:
     ~SceneLoader();
 
     int loadScene(string scene_file);
+
+    int mNumOfTextures;             // = numOfSingle*1 + numOfMulti*2 + numOfCube*1
     vector<Component> mComponents;
 
 private:

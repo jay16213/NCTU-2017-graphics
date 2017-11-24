@@ -20,15 +20,15 @@ public:
         oNames.push_back(string("leaves.obj"));
         oNames.push_back(string("skybox.obj"));
         oNames.push_back(string("groundv2.obj"));
-        oNames.push_back(string("littlefountain.obj"));
+        oNames.push_back(string("LittleFountain.obj"));
         
         tNames.push_back(string("bush.tga"));
-        tNames.push_back(string("EnvXn.bmp"));
         tNames.push_back(string("EnvXp.bmp"));
-        tNames.push_back(string("EnvYn.bmp"));
+        tNames.push_back(string("EnvXn.bmp"));
         tNames.push_back(string("EnvYp.bmp"));
-        tNames.push_back(string("EnvZn.bmp"));
+        tNames.push_back(string("EnvYn.bmp"));
         tNames.push_back(string("EnvZp.bmp"));
+        tNames.push_back(string("EnvZn.bmp"));
         tNames.push_back(string("hedge.bmp"));
         tNames.push_back(string("grass.bmp"));
         tNames.push_back(string("trunk.jpg"));
