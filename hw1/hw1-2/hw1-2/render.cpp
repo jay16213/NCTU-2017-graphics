@@ -50,6 +50,13 @@ void renderWithNoTex(mesh obj)
 
 void renderWithSingleTex(mesh obj, unsigned int *texObj, int texType, int texObjIndex)
 {   
+    glEnable(GL_ALPHA_TEST);
+    glAlphaFunc(GL_GREATER, 0.5f);
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, texObj[texObjIndex]);
+    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+    cout << "bind tex " << texObjIndex << endl;
+
     int lastMaterial = -1;
     for (size_t i = 0; i < obj.fTotal; i++)
     {
@@ -73,9 +80,12 @@ void renderWithSingleTex(mesh obj, unsigned int *texObj, int texType, int texObj
             glNormal3fv(obj.nList[obj.faceList[i][j].n].ptr);
             glVertex3fv(obj.vList[obj.faceList[i][j].v].ptr);
         }
-        //cout << "========" << endl;
         glEnd();
     }
+
+    glDisable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    cout << "unbind tex " << texObjIndex << endl;
 }
 
 void renderWithMultiTex(mesh obj, unsigned int *texObj, int texType, int texObjIndex)

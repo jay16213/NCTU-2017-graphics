@@ -149,16 +149,6 @@ void objViewTransform()
             Model model = scene.mComponents[i].mModels[j];
             cout << "TRS " << files.oNames[model.mObjIndex] << endl;
 
-            if (tex.mType == SINGLE_TEXTURE)
-            {
-                //glEnable(GL_ALPHA_TEST);
-                //glAlphaFunc(GL_GREATER, 0.5f);
-                glEnable(GL_TEXTURE_2D);
-                glBindTexture(GL_TEXTURE_2D, texObj[index]);
-                glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-                cout << "bind tex " << index << endl;
-            }
-
             glPushMatrix();
             glTranslatef(
                 model.mTransfer[X],
@@ -179,13 +169,6 @@ void objViewTransform()
 
             renderObj(objs[model.mObjIndex], texObj, tex.mType, index);
             glPopMatrix();
-
-            if (tex.mType == SINGLE_TEXTURE)
-            {
-                glDisable(GL_TEXTURE_2D);
-                glBindTexture(GL_TEXTURE_2D, 0);
-                cout << "unbind tex " << texObjIndex << endl;
-            }
         } 
     }
 }
