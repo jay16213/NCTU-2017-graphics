@@ -11,6 +11,7 @@ int selectedObj = -1;
 int numOfTextures;
 
 Srcpath files;
+string srcRootPath;
 
 int main(int argc, char **argv)
 {   
@@ -22,8 +23,9 @@ int main(int argc, char **argv)
     switch (res)
     {
         case 1:
+            srcRootPath = files.srcRootPath_park;
             for (int i = 0; i < 9; i++)
-                objs.insert(pair<int, mesh>(i, mesh(files.srcRootPath_park + files.oNames[i], res)));
+                objs.insert(pair<int, mesh>(i, mesh(srcRootPath + files.oNames[i], res)));
 
             light.loadLight(files.srcRootPath_park + string("park.light"));
             scene.loadScene(files.srcRootPath_park + string("park.scene"));
@@ -34,8 +36,9 @@ int main(int argc, char **argv)
             break;
 
         case 2:
+            srcRootPath = files.srcRootPath_chess;
             for (int i = 9; i < 17; i++)
-                objs.insert(pair<int, mesh>(i, mesh(files.srcRootPath_chess + files.oNames[i], res)));
+                objs.insert(pair<int, mesh>(i, mesh(srcRootPath + files.oNames[i], res)));
 
             light.loadLight(files.srcRootPath_chess + string("Chess.light"));
             scene.loadScene(files.srcRootPath_chess + string("Chess.scene"));
@@ -53,7 +56,7 @@ int main(int argc, char **argv)
     glutInit(&argc, argv);
     glutInitWindowSize(800, 600);
     glutInitWindowPosition(0, 0);
-    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
+    glutInitDisplayMode(GLUT_SINGLE | GLUT_RGBA | GLUT_DEPTH);
     glutCreateWindow("HW1-2");
     glewInit();
     glutDisplayFunc(Display);
@@ -94,7 +97,7 @@ void Display()
     glMatrixMode(GL_MODELVIEW);
     objViewTransform();
 
-    glutSwapBuffers();
+    glFlush();
     return;
 }
 
@@ -138,11 +141,23 @@ void objViewTransform()
         FreeImage_Initialise();
         loadTexture(&tex, texObj, &texObjIndex);
         FreeImage_DeInitialise();
+        cout << "load texture" << endl;
+        //system("pause");
 
         for (int j = 0; j < scene.mComponents[i].mNumOfModels; j++)
         {
             Model model = scene.mComponents[i].mModels[j];
-            cout << "render " << files.oNames[model.mObjIndex] << endl;
+            cout << "TRS " << files.oNames[model.mObjIndex] << endl;
+
+            if (tex.mType == SINGLE_TEXTURE)
+            {
+                //glEnable(GL_ALPHA_TEST);
+                //glAlphaFunc(GL_GREATER, 0.5f);
+                glEnable(GL_TEXTURE_2D);
+                glBindTexture(GL_TEXTURE_2D, texObj[index]);
+                glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+                cout << "bind tex " << index << endl;
+            }
 
             glPushMatrix();
             glTranslatef(
@@ -163,12 +178,16 @@ void objViewTransform()
                 );
 
             renderObj(objs[model.mObjIndex], texObj, tex.mType, index);
-
             glPopMatrix();
+
+            if (tex.mType == SINGLE_TEXTURE)
+            {
+                glDisable(GL_TEXTURE_2D);
+                glBindTexture(GL_TEXTURE_2D, 0);
+                cout << "unbind tex " << texObjIndex << endl;
+            }
         } 
     }
-    glDeleteTextures(scene.mNumOfTextures, texObj);
-    delete[]texObj;
 }
 
 void ReShape(int w, int h)

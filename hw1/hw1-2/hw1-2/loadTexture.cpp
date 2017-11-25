@@ -1,6 +1,7 @@
 #include "headers.h"
 
 extern Srcpath files;
+extern string srcRootPath;
 
 void loadTexture(Texture *tex, unsigned int *texObj, int *texObjIndex)
 {
@@ -23,13 +24,15 @@ void loadTexture(Texture *tex, unsigned int *texObj, int *texObjIndex)
 
 void loadSingleTexture(Texture *tex, unsigned int *texObj, int *texObjIndex)
 {
-    string imgFilename = files.tNames[tex->mImgIndex[0]].c_str();
+    string imgFilename = srcRootPath + files.tNames[tex->mImgIndex[0]].c_str();
     FIBITMAP *pImg = FreeImage_Load(FreeImage_GetFileType(imgFilename.c_str(), 0), imgFilename.c_str());
     FIBITMAP *p32BitsImg = FreeImage_ConvertTo32Bits(pImg);
     int width = FreeImage_GetWidth(p32BitsImg);
     int height = FreeImage_GetHeight(p32BitsImg);
 
     cout << "open img " << imgFilename << endl;
+    cout << "w: " << width << " h: " << height << endl;
+
     glBindTexture(GL_TEXTURE_2D, texObj[(*texObjIndex)++]);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -39,9 +42,9 @@ void loadSingleTexture(Texture *tex, unsigned int *texObj, int *texObjIndex)
 
     glGenerateMipmap(GL_TEXTURE_2D);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 1000);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 1000);
 
-    glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
+    //glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
 
     FreeImage_Unload(p32BitsImg);
     FreeImage_Unload(pImg);
@@ -52,13 +55,14 @@ void loadMultiTexture(Texture *tex, unsigned int *texObj, int *texObjIndex)
 {
     for (size_t i = 0; i < tex->mNumOfTextures; i++)
     {
-        string imgFilename = files.tNames[tex->mImgIndex[i]].c_str();
+        string imgFilename = srcRootPath + files.tNames[tex->mImgIndex[i]].c_str();
         FIBITMAP *pImg = FreeImage_Load(FreeImage_GetFileType(imgFilename.c_str(), 0), imgFilename.c_str());
         FIBITMAP *p32BitsImg = FreeImage_ConvertTo32Bits(pImg);
         int width = FreeImage_GetWidth(p32BitsImg);
         int height = FreeImage_GetHeight(p32BitsImg);
 
         cout << "open img " << imgFilename << endl;
+        cout << "w: " << width << " h: " << height << endl;
 
         glBindTexture(GL_TEXTURE_2D, texObj[(*texObjIndex)++]);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -73,7 +77,7 @@ void loadMultiTexture(Texture *tex, unsigned int *texObj, int *texObjIndex)
     }
     glGenerateMipmap(GL_TEXTURE_2D);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 1000);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 1000);
     return;
 }
 
@@ -83,12 +87,13 @@ void loadCubeMapTexture(Texture *tex, unsigned int *texObj, int *texObjIndex)
     int width[6], height[60];
     for (int i = 0; i < 6; i++)
     {
-        string imgFilename = files.tNames[tex->mImgIndex[i]];
+        string imgFilename = srcRootPath + files.tNames[tex->mImgIndex[i]];
         pImg[i] = FreeImage_Load(FreeImage_GetFileType(imgFilename.c_str(), 0), imgFilename.c_str());
         p32BitsImg[i] = FreeImage_ConvertTo32Bits(pImg[i]);
         width[i] = FreeImage_GetWidth(p32BitsImg[i]);
         height[i] = FreeImage_GetHeight(p32BitsImg[i]);
         cout << "open img " << imgFilename << endl;
+        cout << "w: " << width << " h: " << height << endl;
     }
 
     glBindTexture(GL_TEXTURE_CUBE_MAP, texObj[(*texObjIndex)++]);
@@ -104,7 +109,7 @@ void loadCubeMapTexture(Texture *tex, unsigned int *texObj, int *texObjIndex)
 
     glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_BASE_LEVEL, 0);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_BASE_LEVEL, 1000);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAX_LEVEL, 1000);
 
     for (int i = 0; i < 6; i++)
     {

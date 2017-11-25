@@ -2,6 +2,7 @@
 
 void renderObj(mesh obj, unsigned int *texObj, int texType, int texObjIndex)
 {
+    cout << "render" << endl;
     switch (texType)
     {
         case NO_TEXTURE:
@@ -48,14 +49,7 @@ void renderWithNoTex(mesh obj)
 }
 
 void renderWithSingleTex(mesh obj, unsigned int *texObj, int texType, int texObjIndex)
-{
-    glEnable(GL_ALPHA_TEST);
-    glAlphaFunc(GL_GREATER, 0.5f);
-    glEnable(GL_TEXTURE_2D);
-    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-
-    glBindTexture(GL_TEXTURE_2D, texObj[texObjIndex]);
-
+{   
     int lastMaterial = -1;
     for (size_t i = 0; i < obj.fTotal; i++)
     {
@@ -67,16 +61,19 @@ void renderWithSingleTex(mesh obj, unsigned int *texObj, int texType, int texObj
             glMaterialfv(GL_FRONT, GL_DIFFUSE, obj.mList[lastMaterial].Kd);
             glMaterialfv(GL_FRONT, GL_SPECULAR, obj.mList[lastMaterial].Ks);
             glMaterialfv(GL_FRONT, GL_SHININESS, &obj.mList[lastMaterial].Ns);
+            cout << "set material" << endl;
         }
 
         glBegin(GL_TRIANGLES);
         for (size_t j = 0; j<3; j++)
         {
             //textex corrd. object->tList[object->faceList[i][j].t].ptr
+            //printf("(u, v): %f, %f\n", obj.tList[obj.faceList[i][j].t].ptr[0], obj.tList[obj.faceList[i][j].t].ptr[1]);
             glTexCoord2fv(obj.tList[obj.faceList[i][j].t].ptr);
             glNormal3fv(obj.nList[obj.faceList[i][j].n].ptr);
             glVertex3fv(obj.vList[obj.faceList[i][j].v].ptr);
         }
+        //cout << "========" << endl;
         glEnd();
     }
 }
@@ -89,13 +86,16 @@ void renderWithMultiTex(mesh obj, unsigned int *texObj, int texType, int texObjI
     glBindTexture(GL_TEXTURE_2D, texObj[texObjIndex]);
     glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE);
     glTexEnvf(GL_TEXTURE_ENV, GL_COMBINE_RGB, GL_MODULATE);
+    cout << "bind tex " << texObjIndex << endl;
+
     //bind texture 1
     glActiveTexture(GL_TEXTURE1);
     glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, texObj[texObjIndex + 1]);
     glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE);
     glTexEnvf(GL_TEXTURE_ENV, GL_COMBINE_RGB, GL_MODULATE);
-    
+    cout << "bind tex " << texObjIndex+1 << endl;
+
     //render obj
     int lastMaterial = -1;
     for (size_t i = 0; i < obj.fTotal; i++)
@@ -142,6 +142,8 @@ void renderWithCubeMap(mesh obj, unsigned int *texObj, int texType, int texObjIn
     glEnable(GL_TEXTURE_GEN_R);
     glEnable(GL_TEXTURE_CUBE_MAP);
     glBindTexture(GL_TEXTURE_CUBE_MAP, texObj[texObjIndex]);
+    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+    cout << "bind tex " << texObjIndex << endl;
 
     //render obj
     int lastMaterial = -1;
@@ -168,8 +170,8 @@ void renderWithCubeMap(mesh obj, unsigned int *texObj, int texType, int texObjIn
     }
 
     glDisable(GL_TEXTURE_CUBE_MAP);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
     glDisable(GL_TEXTURE_GEN_R);
     glDisable(GL_TEXTURE_GEN_T);
     glDisable(GL_TEXTURE_GEN_S);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 }
