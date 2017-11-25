@@ -30,9 +30,6 @@ void loadSingleTexture(Texture *tex, unsigned int *texObj, int *texObjIndex)
     int width = FreeImage_GetWidth(p32BitsImg);
     int height = FreeImage_GetHeight(p32BitsImg);
 
-    cout << "open img " << imgFilename << endl;
-    cout << "w: " << width << " h: " << height << endl;
-
     glBindTexture(GL_TEXTURE_2D, texObj[(*texObjIndex)++]);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -60,9 +57,6 @@ void loadMultiTexture(Texture *tex, unsigned int *texObj, int *texObjIndex)
         FIBITMAP *p32BitsImg = FreeImage_ConvertTo32Bits(pImg);
         int width = FreeImage_GetWidth(p32BitsImg);
         int height = FreeImage_GetHeight(p32BitsImg);
-
-        cout << "open img " << imgFilename << endl;
-        cout << "w: " << width << " h: " << height << endl;
 
         glBindTexture(GL_TEXTURE_2D, texObj[(*texObjIndex)++]);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR);
@@ -99,10 +93,6 @@ void loadCubeMapTexture(Texture *tex, unsigned int *texObj, int *texObjIndex)
         p32BitsImg = FreeImage_ConvertTo32Bits(pImg);
         width = FreeImage_GetWidth(p32BitsImg);
         height = FreeImage_GetHeight(p32BitsImg);
-        cout << "open img " << imgFilename << endl;
-        cout << "w: " << width << " h: " << height << endl;
-
-        
 
         glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGBA8, width, height,
             0, GL_BGRA, GL_UNSIGNED_BYTE, (void *)FreeImage_GetBits(p32BitsImg));

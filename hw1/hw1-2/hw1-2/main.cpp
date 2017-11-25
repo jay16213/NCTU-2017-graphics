@@ -31,7 +31,7 @@ int main(int argc, char **argv)
             scene.loadScene(files.srcRootPath_park + string("park.scene"));
             view.loadView(files.srcRootPath_park + string("park.view"));
 
-            zoomDegree = 20.0;
+            zoomDegree = 5.0;
             dragDegree = 0.8;
             break;
 
@@ -44,7 +44,7 @@ int main(int argc, char **argv)
             scene.loadScene(files.srcRootPath_chess + string("Chess.scene"));
             view.loadView(files.srcRootPath_chess + string("Chess.view"));
 
-            zoomDegree = 0.1;
+            zoomDegree = 5;
             dragDegree = 50.0;
             break;
 
@@ -125,8 +125,7 @@ void lighting()
 
 void objViewTransform()
 {
-    glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LEQUAL);
+    
     unsigned int *texObj;
     texObj = new unsigned int[scene.mNumOfTextures];
     glGenTextures(scene.mNumOfTextures, texObj);
@@ -141,13 +140,10 @@ void objViewTransform()
         FreeImage_Initialise();
         loadTexture(&tex, texObj, &texObjIndex);
         FreeImage_DeInitialise();
-        cout << "load texture" << endl;
-        //system("pause");
 
         for (int j = 0; j < scene.mComponents[i].mNumOfModels; j++)
         {
             Model model = scene.mComponents[i].mModels[j];
-            cout << "TRS " << files.oNames[model.mObjIndex] << endl;
 
             glPushMatrix();
             glTranslatef(
