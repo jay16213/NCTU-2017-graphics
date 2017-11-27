@@ -1,7 +1,7 @@
 #include "SceneLoader.h"
 
-SceneLoader::SceneLoader() { mNumOfObjs = 0; }
-SceneLoader::~SceneLoader() { mFiles.clear(); }
+SceneLoader::SceneLoader() { mNumOfTextures = 0; }
+SceneLoader::~SceneLoader() { }
 
 int SceneLoader::loadScene(string scene_file)
 {
@@ -14,80 +14,131 @@ int SceneLoader::loadScene(string scene_file)
     cout << "Load the scene info..." << endl;
     
     
-    string line, param_name;
+    string line, param;
+    int insert = 0;
+    Texture tex;
+    vector<Model> models;
     while(getline(scene, line))
     {
         stringstream ss(line);
-        ss >> param_name;
+        ss >> param;
 
-        if (param_name == "no-texture")
+        if (param == "no-texture")
         {
-            mType = NO_TEXTURE;
-        }
-        else if (param_name == "single-texture")
-        {
-            mType = SINGLE_TEXTURE;
-            mFiles.clear();
-            string file;
-            ss >> file;
-            mFiles.push_back(file);
-        }
-        else if (param_name == "multi-texture")
-        {
-            mType = MULTI_TEXTURE;
-            mFiles.clear();
-            string file;
-            while (ss >> file) mFiles.push_back(file);
-        }
-        else if (param_name == "cube-map")
-        {
-            mType = CUBE_MAP;
-            mFiles.clear();
-            string file;
-            while (ss >> file) mFiles.push_back(file);
-        }
-        else if(param_name == "model")
-        {
-            string obj_name;
-            float s[3], angle, r[3], t[3];
-            
-            ss >> obj_name;
-            ss >> s[0] >> s[1] >> s[2];
-            ss >> angle >> r[0] >> r[1] >> r[2];
-            ss >> t[0] >> t[1] >> t[2];
-            
-            int id;
-            if ((id = getModelId(obj_name)) == -1)
+            if (insert)
             {
-                cout << "get model id error" << endl;
-                system("pause");
-                exit(-1);
+                mComponents.push_back(Component(tex, models));
+                models.clear();
+                insert = 0;
             }
 
-            Model model(
-                id,
-                mType,
-                Rotate(angle, Coord3<float>(r)),
-                Coord3<float>(s),
-                Coord3<float>(t),
-                mFiles
-            );
+            tex = Texture(NO_TEXTURE, vector<int>());
+        }
+        else if (param == "single-texture")
+        {
+            if (insert)
+            {
+                mComponents.push_back(Component(tex, models));
+                models.clear();
+                insert = 0;
+            }
 
-            mObjects.push_back(model);
-            mNumOfObjs++;
+            ss >> param;
+            int imgIndex = getImgFileId(param);
+            tex = Texture(SINGLE_TEXTURE, vector<int>(1, imgIndex));
+            mNumOfTextures++;
+            printf("Texture: %d %s\n", tex.mType, files.tNames[tex.mImgIndex[0]].c_str());
+        }
+        else if (param == "multi-texture")
+        {
+            if (insert)
+            {
+                mComponents.push_back(Component(tex, models));
+                models.clear();
+                insert = 0;
+            }
+
+            vector<int> imgIndex;
+            while (ss >> param)
+            {
+                imgIndex.push_back(getImgFileId(param));
+                mNumOfTextures++;
+            }
+            tex = Texture(MULTI_TEXTURE, imgIndex);
+
+            printf("Texture: %d ", tex.mType);
+            for (int i = 0; i < tex.mImgIndex.size(); i++)
+            {
+                printf("%s ", files.tNames[tex.mImgIndex[i]].c_str());
+            }
+            printf("\n");
+        }
+        else if (param == "cube-map")
+        {
+            if (insert)
+            {
+                mComponents.push_back(Component(tex, models));
+                models.clear();
+                insert = 0;
+            }
+
+            vector<int> imgIndex;
+            while (ss >> param)
+                imgIndex.push_back(getImgFileId(param));
+
+            tex = Texture(CUBE_MAP, imgIndex);
+            mNumOfTextures++;
+
+            printf("Texture: %d ", tex.mType);
+            for (int i = 0; i < tex.mImgIndex.size(); i++)
+            {
+                printf("%s ", files.tNames[tex.mImgIndex[i]].c_str());
+            }
+            printf("\n");
+        }
+        else if (param == "model")
+        {
+            insert = 1;
+            string obj_name;
+            float angle, rAv[3], s[3], t[3];
+
+            ss >> obj_name;
+            ss >> s[0] >> s[1] >> s[2];
+            ss >> angle >> rAv[0] >> rAv[1] >> rAv[2];
+            ss >> t[0] >> t[1] >> t[2];
+
+            int objIndex = getObjId(obj_name);
+            models.push_back(Model(objIndex, angle, Coord3f(rAv), Coord3f(s), Coord3f(t)));
         }
     }
+    mComponents.push_back(Component(tex, models));
     
     scene.close();
     return 0;
 }
 
-int SceneLoader::getModelId(string obj)
+int SceneLoader::getObjId(string obj)
 {
-    for (size_t i = 0; i < files.fNames.size(); i++)
+    for (size_t i = 0; i < files.oNames.size(); i++)
     {
-        if (obj == files.fNames[i]) return i;
+        if (obj == files.oNames[i]) return i;
     }
 
+    cout << "get Obj id error" << endl;
+    system("pause");
+    exit(-1);
+    return -1;
+}
+
+int SceneLoader::getImgFileId(string tex)
+{
+    for (size_t i = 0; i < files.tNames.size(); i++)
+    {
+        if (tex == files.tNames[i]) return i;
+    }
+
+    cout << "get Tex id error" << endl;
+    system("pause");
+    exit(-1);
     return -1;
 }

@@ -10,90 +10,32 @@
 #include <string>
 #include <vector>
 #include <map>
-#include "Coord3.h"
+#include "Texture.h"
 #include "Srcpath.h"
+#include "Coord3.h"
+#include "Model.h"
 using namespace std;
 
-//texture type
-#define NO_TEXTURE          0
-#define SINGLE_TEXTURE      1
-#define MULTI_TEXTURE       2
-#define CUBE_MAP            3
-
-//park
-#define GEM                 0
-#define BRUSH               1
-#define TRUNK               2
-#define WATER               3
-#define HEDGE               4
-#define LEAVES              5
-#define SKYBOX              6
-#define GROUNDV2            7
-#define LITTLE_FOUNTAIN     8
-
-
-//chess
-#define ROOK                9
-#define ROOM               10
-#define KING               11
-#define PAWN               12
-#define QUEEN              13
-#define KNIGHT             14
-#define BISHOP             15
-#define CHESSBOARD         16
-
-
-class Rotate
+//a component is composed of one texture and multi model,
+//where the texture has 4 types(no, single, multi, cube map)
+class Component
 {
 public:
-    Rotate() {}
-    Rotate(float angle, Coord3<float> axisVec)
+    Component() {}
+    Component(Texture tex, vector<Model> models)
     {
-        mAngle = angle;
-        mAxisVec = axisVec;
+        mTex = tex;
+        mModels.assign(models.begin(), models.end());
+        mNumOfModels = mModels.size();
     }
-    ~Rotate() {}
+    ~Component() {}
 
-    Rotate& operator=(const Rotate rhs)
-    {
-        mAngle = rhs.mAngle;
-        mAxisVec = rhs.mAxisVec;
-        return *this;
-    }
-    float mAngle;
-    Coord3<float> mAxisVec;
-
+    Texture mTex;           // one texture
+    int mNumOfModels;       // number of models
+    vector<Model> mModels;  // multi models
 };
 
-class Model
-{
-public:
-    Model() {}
-    Model(
-        int id,
-        int type,
-        Rotate r,
-        Coord3<float> s,
-        Coord3<float> t,
-        vector<string> files)
-    {
-        mId = id;
-        mTextureType = type;
-        mRotate = r;
-        mScale = s;
-        mTransfer = t;
-        mImgFiles.assign(files.begin(), files.end());
-    }
-    ~Model() {}
-
-    int mId;
-    int mTextureType;
-    vector<string> mImgFiles;
-    Rotate mRotate;
-    Coord3<float> mScale;
-    Coord3<float> mTransfer;
-};
-
+// the whole scene is composed of many components
 class SceneLoader
 {
 public:
@@ -102,14 +44,13 @@ public:
 
     int loadScene(string scene_file);
 
-    int mNumOfObjs;
-    vector<Model> mObjects;
+    int mNumOfTextures;             // = numOfSingle*1 + numOfMulti*2 + numOfCube*1
+    vector<Component> mComponents;
 
 private:
-    int getModelId(string obj);
-    vector<string> mFiles;
+    int getObjId(string obj);
+    int getImgFileId(string tex);
     Srcpath files;
-    int mType;
 };
 
 #endif

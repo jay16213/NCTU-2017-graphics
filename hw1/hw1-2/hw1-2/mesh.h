@@ -97,7 +97,7 @@ public:
 
 	std::string					matFile;
 
-	size_t						mTotal;	// total material 
+	size_t						mTotal;	    // total material 
 	std::map<std::string,size_t>matMap;		// matMap[material_name] = material_ID
 	std::vector<material>		mList;		// material ID (每個 mesh 最多有 100 種 material)	
 
@@ -108,13 +108,13 @@ public:
 
 	size_t	vTotal, tTotal, nTotal, fTotal; // number of total vertice, faces, texture coord., normal vecters, and faces
 
-	void	LoadMesh(std::string scene_file);
+    void	LoadMesh(std::string scene_file, int testScene);
 	
 	mesh();
-	mesh(std::string obj_file);
+    mesh(std::string obj_file, int testScene);
 	virtual ~mesh();
 
-	void Init(std::string obj_file);
+    void Init(std::string obj_file, int testScene);
 
 private:
 	FILE		*fp_mtl;
