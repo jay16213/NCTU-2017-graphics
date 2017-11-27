@@ -5,7 +5,7 @@ ViewLoader view;
 LightLoader light;
 map<int, mesh> objs;
 
-double zoomDegree = 0.0, dragDegree = 0.0, rotateDegree = M_PI / 180;
+double zoomDegree = 0.0, dragDegree = 0.0, rotateDegree = M_PI / 150;
 int selectedObj = -1;
 
 int numOfTextures;
@@ -31,7 +31,7 @@ int main(int argc, char **argv)
             scene.loadScene(files.srcRootPath_park + string("park.scene"));
             view.loadView(files.srcRootPath_park + string("park.view"));
 
-            zoomDegree = 5.0;
+            zoomDegree = 3.0;
             dragDegree = 0.8;
             break;
 
@@ -165,8 +165,10 @@ void objViewTransform()
 
             renderObj(objs[model.mObjIndex], texObj, tex.mType, index);
             glPopMatrix();
-        } 
+        }
     }
+    delete[]texObj;
+    return;
 }
 
 void ReShape(int w, int h)
