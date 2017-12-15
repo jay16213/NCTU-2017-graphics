@@ -7,9 +7,8 @@ map<int, mesh> objs;
 
 double zoomDegree = 0.0, rotateDegree = M_PI / 150;
 
-int numOfTextures;
-
 Srcpath files;
+Model *frontMirror, *backMirror;
 
 int main(int argc, char **argv)
 {   
@@ -22,6 +21,9 @@ int main(int argc, char **argv)
     view.loadView(files.srcRootPath + string("CornellBox.view"));
     zoomDegree = 3.0;
 
+    frontMirror = &scene.mComponents[1].mModels[2];
+    backMirror = &scene.mComponents[1].mModels[3];
+    
     glutInit(&argc, argv);
     glutInitWindowSize(800, 600);
     glutInitWindowPosition(0, 0);
@@ -29,53 +31,10 @@ int main(int argc, char **argv)
     glutCreateWindow("Assignment 2");
     glewInit();
     glutDisplayFunc(Display);
-    glutReshapeFunc(ReShape);
+    //glutReshapeFunc(ReShape);
     glutKeyboardFunc(Keyboard);
     glutMainLoop();
     return 0;
-}
-
-void Display()
-{
-    glEnable(GL_STENCIL_TEST);
-    glClearStencil(0);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT |
-            GL_STENCIL_BUFFER_BIT | GL_ACCUM_BUFFER_BIT
-    );
-
-    //viewing and modeling transformation
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-    gluLookAt(
-        view.mEye[X], view.mEye[Y], view.mEye[Z],//eye
-        view.mVat[X], view.mVat[Y], view.mVat[Z],//center
-        view.mVup[X], view.mVup[Y], view.mVup[Z] //up
-        );
-
-    //compute lighting of objs
-    lighting();
-
-    //projection transformation
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    gluPerspective(view.mFovy, view.mAspect, view.mDnear, view.mDfar);
-
-    //viewport transformation
-    glViewport(view.mViewport[X], view.mViewport[Y], view.mViewport[2], view.mViewport[3]);
-
-    //do obj transformation and rendering object
-    glMatrixMode(GL_MODELVIEW);
-
-    glColorMask(0xFF, 0xFF, 0xFF, 0xFF);
-    drawMirror(&objs[2]);
-    drawScene();
-    glClear(GL_COLOR_BUFFER_BIT);
-
-
-    objViewTransform();
-
-    glFlush();
-    return;
 }
 
 void lighting()
@@ -100,50 +59,105 @@ void lighting()
     return;
 }
 
-void objViewTransform()
+void Display()
 {
-    glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LEQUAL);
-    glEnable(GL_CULL_FACE);
-    //glEnable(GL_STENCIL_TEST);
-    glCullFace(GL_BACK);
+    glClearStencil(0);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT |
+            GL_STENCIL_BUFFER_BIT | GL_ACCUM_BUFFER_BIT
+    );
 
-    for (int i = 0; i < 2; i++)
+    //viewing and modeling transformation
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+    gluLookAt(
+        view.mEye[X], view.mEye[Y], view.mEye[Z],//eye
+        view.mVat[X], view.mVat[Y], view.mVat[Z],//center
+        view.mVup[X], view.mVup[Y], view.mVup[Z] //up
+        );
+
+    //compute lighting of objs
+    lighting();
+
+    //projection transformation
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    gluPerspective(view.mFovy, view.mAspect, view.mDnear, view.mDfar);
+
+    //viewport transformation
+    glViewport(view.mViewport[X], view.mViewport[Y], view.mViewport[2], view.mViewport[3]);
+    
+    //do obj transformation and rendering object
+    glMatrixMode(GL_MODELVIEW);
+    for (int i = 0; i < 1; i++)
     {
-        glStencilFunc(GL_EQUAL, i, 0xFF);
-        glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
-        /*if (i)
-            glCullFace(GL_FRONT);
-        else*/
-        
-        for (int j = 0; j < scene.mComponents.size(); j++)
-        {
-            Texture tex = scene.mComponents[j].mTex;
-            for (int k = 0; k < scene.mComponents[j].mNumOfModels; k++)
-            {
-                Model model = scene.mComponents[j].mModels[k];
-                //if (j == 1 && k == 2) continue;
-                glPushMatrix();
-                glTranslatef(
-                    model.mTransfer[X] - (i ? 2* abs(model.mTransfer[X] + 40) : 0),
-                    model.mTransfer[Y],
-                    model.mTransfer[Z]
-                    );
-                glRotatef(
-                    model.mAngle,
-                    model.mRotateAxisVec[X],
-                    model.mRotateAxisVec[Y],
-                    model.mRotateAxisVec[Z]
-                    );
-                glScalef(
-                    model.mScale[X],
-                    model.mScale[Y],
-                    model.mScale[Z]
-                    );
+        glColorMask(0xFF, 0xFF, 0xFF, 0xFF);
+        glEnable(GL_STENCIL_TEST);
+        glStencilFunc(GL_ALWAYS, 1, 0xFF);
+        glStencilOp(GL_KEEP, GL_KEEP, GL_INCR);
+        drawMirror(frontMirror, i);
+        glDisable(GL_STENCIL_TEST);
 
-                renderObj(objs[model.mObjIndex], 0, tex.mType, 0);
-                glPopMatrix();
+        glEnable(GL_DEPTH_TEST);
+        glEnable(GL_STENCIL_TEST);
+        glStencilFunc(GL_EQUAL, 1, 0xFF);
+        glStencilOp(GL_KEEP, GL_KEEP, GL_DECR);
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_FRONT);
+        drawScene(i);
+        glDisable(GL_CULL_FACE);
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        for (int depth = 0; depth < 2; depth++)
+        {
+            glEnable(GL_DEPTH_TEST);
+            glDepthFunc(GL_LEQUAL);
+            glStencilFunc(GL_EQUAL, depth, 0xFF);
+            glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+            glEnable(GL_CULL_FACE);
+            if (depth % 2)
+            {
+                glCullFace(GL_FRONT);
+                glFrontFace(GL_CW);
             }
+            else
+            {
+                glCullFace(GL_BACK);
+            }
+            objViewTransform(depth);
+        }
+    }
+
+
+    glFlush();
+    return;
+}
+
+void objViewTransform(int depth)
+{
+    for (int j = 0; j < scene.mComponents.size(); j++)
+    {
+        for (int k = 0; k < scene.mComponents[j].mNumOfModels; k++)
+        {
+            Model *m = &scene.mComponents[j].mModels[k];
+
+            double fd = fabs(m->mTransfer[X] + 40);
+            double bd = fabs(m->mTransfer[X] - 40);
+            double displacement = 0.0;
+
+            int t = depth;
+            while (t)
+            {
+                displacement -= (t % 2) ? 2 * fd : 2 * bd;
+                t--;
+            }
+
+            glPushMatrix();
+            glTranslatef(m->mTransfer[X] + displacement, m->mTransfer[Y], m->mTransfer[Z]);
+            glRotatef(m->mAngle, m->mRotateAxisVec[X], m->mRotateAxisVec[Y], m->mRotateAxisVec[Z]);
+            glScalef(m->mScale[X], m->mScale[Y], m->mScale[Z]);
+
+            renderObj(&objs[m->mObjIndex], depth);
+            glPopMatrix();
         }
     }
     return;

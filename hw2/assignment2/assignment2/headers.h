@@ -26,11 +26,11 @@ using namespace std;
 
 void Display();
 void ReShape(int w, int h);
-void objViewTransform();
+void objViewTransform(int depth);
 void lighting();
-void renderObj(mesh obj, unsigned int *texObj, int texType, int texObjIndex);
-void drawMirror(mesh *mirror);
-void drawScene();
+void renderObj(mesh *obj, int depth);
+void drawMirror(Model *mirror, int depth);
+void drawScene(int depth);
 
 void Keyboard(unsigned char key, int x, int y);
 void Mouse(int button, int state, int x, int y);
