@@ -23,17 +23,17 @@ int ViewLoader::loadView(string view_file)
         {
             double x, y, z;
             view >> x >> y >> z;
-            mEye = Coord3<double>(x, y, z);
+            mEye = Coord3d(x, y, z);
             printf("eye: %f %f %f\n", mEye[0], mEye[1], mEye[2]);
         }
         else if(strcmp(param_name, "vat") == 0)
         {
             double x, y, z;
             view >> x >> y >> z;
-            mVat = Coord3<double>(x, y, z);
+            mVat = Coord3d(x, y, z);
             printf("vat: %f %f %f\n", mVat[0], mVat[1], mVat[2]);
 
-            Coord3<double> v(mVat[0] - mEye[0], mVat[1] - mEye[1], mVat[2] - mEye[2]);
+            Coord3d v(mVat[0] - mEye[0], mVat[1] - mEye[1], mVat[2] - mEye[2]);
             double len = v.vecLen();
             printf("%f %f %f\n", v[0], v[1], v[2]);
             for (int i = 0; i < 3; i++)
@@ -47,15 +47,15 @@ int ViewLoader::loadView(string view_file)
         {
             double x, y, z;
             view >> x >> y >> z;
-            mVup = Coord3<double>(x, y, z);
+            mVup = Coord3d(x, y, z);
             printf("vup: %f %f %f\n", mVup[0], mVup[1], mVup[2]);
 
-            Coord3<double> t(
+            Coord3d t(
                 mUnitVat[1] * mVup[2] - mUnitVat[2] * mVup[1],
                 mUnitVat[2] * mVup[0] - mUnitVat[0] * mVup[2],
                 mUnitVat[0] * mVup[1] - mUnitVat[1] * mVat[0]
             );
-            Coord3<double> normal(
+            Coord3d normal(
                 mUnitVat[1] * t[2] - mUnitVat[2] * t[1],
                 mUnitVat[2] * t[0] - mUnitVat[0] * t[2],
                 mUnitVat[0] * t[1] - mUnitVat[1] * t[0]
@@ -105,7 +105,7 @@ int ViewLoader::loadView(string view_file)
 
 void ViewLoader::updateUnitVat()
 {
-    Coord3<double> v(mVat[0] - mEye[0], mVat[1] - mEye[1], mVat[2] - mEye[2]);
+    Coord3d v(mVat[0] - mEye[0], mVat[1] - mEye[1], mVat[2] - mEye[2]);
     double len = v.vecLen();
     for (int i = 0; i < 3; i++)
         mUnitVat[i] = (double)(v[i] / len);
@@ -115,8 +115,28 @@ void ViewLoader::updateUnitVat()
 
 void ViewLoader::updateDistance()
 {
-    Coord3<double> v(mVat[0] - mEye[0], mVat[1] - mEye[1], mVat[2] - mEye[2]);
+    Coord3d v(mVat[0] - mEye[0], mVat[1] - mEye[1], mVat[2] - mEye[2]);
     mDistance = v.vecLen();
     cout << "update dis " << mDistance << endl;
+    return;
+}
+
+void ViewLoader::updateRight()
+{
+    Coord3d v(mVat[0] - mEye[0], mVat[1] - mEye[1], mVat[2] - mEye[2]);
+    
+    //vat cross vup
+    mRight[0] = (v[1] * mVup[2]) - (v[2] * mVup[1]);//y1z2 - z1y2
+    mRight[1] = (v[2] * mVup[0]) - (v[0] * mVup[2]);//z1x2 - x1z2
+    mRight[2] = (v[0] * mVup[1]) - (v[1] * mVup[0]);//y1z2 - z1y2
+
+    double len = mRight.vecLen();
+    for (int i = 0; i < 3; i++)
+    {
+        mRight[i] = mRight[i] / len;
+        if (mRight[i] == 0) mRight[i] = 0.0;
+    }
+
+    cout << "right: " << mRight[0] << " " << mRight[1] << " " << mRight[2] << endl;
     return;
 }

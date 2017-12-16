@@ -69,7 +69,7 @@ public:
 class Coord3d : public Coord3<double>
 {
 public:
-    Coord3d();
+    Coord3d() {}
     Coord3d(double c1, double c2, double c3) : Coord3<double>(c1, c2, c3) {}
     Coord3d(double *p) : Coord3<double>(p) {}
     ~Coord3d() {}

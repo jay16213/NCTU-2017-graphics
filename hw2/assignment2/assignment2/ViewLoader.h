@@ -17,12 +17,14 @@ class ViewLoader{
         int loadView(string view_file);
         void updateUnitVat();
         void updateDistance();
+        void updateRight();
 
-        Coord3<double> mEye;
-        Coord3<double> mVat;
-        Coord3<double> mUnitVat;//unit vector which from eye to mVat
-        Coord3<double> mVup;
-        Coord3<double> mNormal;
+        Coord3d mEye;
+        Coord3d mVat;
+        Coord3d mRight;
+        Coord3d mUnitVat;//unit vector which from eye to mVat
+        Coord3d mVup;
+        Coord3d mNormal;
         double mDistance;
         double mFovy;
         double mDnear;
