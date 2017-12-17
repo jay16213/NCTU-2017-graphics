@@ -86,7 +86,7 @@ void Display()
     int numOfPass = 8;
 
     Coord3d jitter(0.0, 0.0, 0.0);
-    double angle = 360 / numOfPass;
+    int angle = 360 / numOfPass;
     double c = M_PI / 180;
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT | GL_ACCUM_BUFFER_BIT);
@@ -101,11 +101,13 @@ void Display()
         cout << "--------------------------------" << endl;
         cout << "pass " << pass << endl;
 
-        for (int i = 0; i < 3; i++)
-            jitter[i] = view.mRight[i] * cos((angle * pass) * c) + view.mVup[i] * sin((angle * pass) * c);
-        
-        double len = jitter.vecLen() * 5;//jitter distance to 0.2
-        for (int i = 0; i < 3; i++) jitter[i] = jitter[i] / len;
+        //if (pass)
+        {
+            for (int i = 0; i < 3; i++)
+                jitter[i] = view.mRight[i] * cos((angle * pass) * c) + view.mVup[i] * sin((angle * pass) * c);
+            double len = jitter.vecLen() * 5;//jitter distance to 0.2
+            for (int i = 0; i < 3; i++) jitter[i] = jitter[i] / len;
+        }
         
         glEnable(GL_MODELVIEW);
         glMatrixMode(GL_MODELVIEW);
@@ -135,7 +137,7 @@ void Display()
 
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_CULL_FACE);
-        for (int i = 0; i <= 4; i++)
+        for (int i = 0; i < 4; i++)
         {
             glStencilFunc(GL_EQUAL, i, 0xFF);
             glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
@@ -148,7 +150,7 @@ void Display()
             drawScene(FRONT, i);
         }
 
-        for (int i = 1; i <= 4; i++)
+        for (int i = 1; i < 4; i++)
         {
             glStencilFunc(GL_EQUAL, i, 0xFF);
             glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
@@ -178,7 +180,7 @@ void setStencil()
 
     drawMirror(frontMirror, FRONT, 0);
 
-    for (int i = 0; i <= 4; i++)
+    for (int i = 0; i < 4; i++)
     {
         glStencilFunc(GL_EQUAL, i + 1, 0xFF);
         glStencilOp(GL_KEEP, GL_KEEP, GL_DECR);
@@ -196,7 +198,7 @@ void setStencil()
 
     drawMirror(backMirror, BACK, 0);
 
-    for (int i = 0; i <= 4; i++)
+    for (int i = 0; i < 4; i++)
     {
         glStencilFunc(GL_EQUAL, i + 1, 0xFF);
         glStencilOp(GL_KEEP, GL_KEEP, GL_DECR);
@@ -207,7 +209,6 @@ void setStencil()
         glStencilOp(GL_KEEP, GL_KEEP, GL_INCR);
         drawMirror(backMirror, BACK, i + 1);
     }
-
     return;
 }
 
@@ -246,9 +247,9 @@ void drawScene(int dir, int depth)
             if (i == 1 && j >= 2) continue;
             Model *m = &scene.mComponents[i].mModels[j];
 
-            double fd = 2 * fabs(m->mTransfer[X] + 40.0);
-            double bd = 2 * fabs(m->mTransfer[X] - 40.0);
-            double displacement = 0.0;
+            float fd = 2 * fabs(m->mTransfer[X] + 40.0);
+            float bd = 2 * fabs(m->mTransfer[X] - 40.0);
+            float displacement = 0.0;
 
             int t = depth;
             switch (dir)
