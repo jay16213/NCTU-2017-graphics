@@ -7,8 +7,6 @@ map<int, mesh> objs;
 
 double zoomDegree = 0.0, rotateDegree = M_PI / 150;
 
-int focus;
-
 Model *frontMirror, *backMirror;
 
 int main(int argc, char **argv)
@@ -27,11 +25,8 @@ int main(int argc, char **argv)
 
     frontMirror = &scene.mComponents[1].mModels[2];
     backMirror = &scene.mComponents[1].mModels[3];
-    focus = 1;
 
-    view.mVat[X] = -10.0;
-    view.mVat[Y] = 12.0;
-    view.mVat[Z] = 0.0;
+    view.mVat.assign(-10, 12, 0);
 
     glutInit(&argc, argv);
     glutInitWindowSize(800, 600);
@@ -96,34 +91,27 @@ void Display()
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT | GL_ACCUM_BUFFER_BIT);
 
-    //lighting(0);
+    glEnable(GL_STENCIL_TEST);
+
     view.updateRight();
     for (int pass = 0; pass < numOfPass; pass++)
     {
-        glEnable(GL_STENCIL_TEST);
-        glClear(GL_DEPTH_BUFFER_BIT);
+        glClear(GL_STENCIL_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         cout << "--------------------------------" << endl;
         cout << "pass " << pass << endl;
-        if (pass)
-        {
-            jitter[X] = view.mRight[X] * cos((angle * pass) * c) + view.mVup[X] * sin((angle * pass) * c);
-            jitter[Y] = view.mRight[Y] * cos((angle * pass) * c) + view.mVup[Y] * sin((angle * pass) * c);
-            jitter[Z] = view.mRight[Z] * cos((angle * pass) * c) + view.mVup[Z] * sin((angle * pass) * c);
-        }
 
+        for (int i = 0; i < 3; i++)
+            jitter[i] = view.mRight[i] * cos((angle * pass) * c) + view.mVup[i] * sin((angle * pass) * c);
+        
         double len = jitter.vecLen() * 5;//jitter distance to 0.2
         for (int i = 0; i < 3; i++) jitter[i] = jitter[i] / len;
-
-        double eye_x = view.mEye[X] + jitter[X];
-        double eye_y = view.mEye[Y] + jitter[Y];
-        double eye_z = view.mEye[Z] + jitter[Z];
-
+        
         glEnable(GL_MODELVIEW);
-        //glMatrixMode(GL_MODELVIEW);
+        glMatrixMode(GL_MODELVIEW);
         glLoadIdentity();
         gluLookAt(
-            eye_x, eye_y, eye_z,
+            view.mEye[X] + jitter[X], view.mEye[Y] + jitter[Y], view.mEye[Z] + jitter[Z],
             view.mVat[X], view.mVat[Y], view.mVat[Z],
             view.mVup[X], view.mVup[Y], view.mVup[Z]
         );
@@ -133,69 +121,46 @@ void Display()
         gluPerspective(view.mFovy, view.mAspect, view.mDnear, view.mDfar);
         glViewport(view.mViewport[X], view.mViewport[Y], view.mViewport[2], view.mViewport[3]);
 
-        lighting(pass);
+        lighting(0);
 
         glMatrixMode(GL_MODELVIEW);
 
-        glClear(GL_STENCIL_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
         glDepthMask(GL_FALSE);
         glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-        glStencilFunc(GL_ALWAYS, 1, 0xFF);
-        glStencilOp(GL_KEEP, GL_KEEP, GL_INCR);
+        
+        setStencil();
 
-        drawMirror(frontMirror, FRONT, 0);
-
-        for (int i = 0; i < 8; i++)
-        {
-            glStencilFunc(GL_EQUAL, i + 1, 0xFF);
-            glStencilOp(GL_KEEP, GL_KEEP, GL_DECR);
-
-            //glEnable(GL_CULL_FACE);
-            /*if (i % 2 > 0)
-            {
-                glCullFace(GL_FRONT);
-            }
-            else
-                glCullFace(GL_BACK);*/
-            drawScene(FRONT, i);
-            //glDisable(GL_CULL_FACE);
-
-            glStencilFunc(GL_EQUAL, i + 1, 0xFF);
-            glStencilOp(GL_KEEP, GL_KEEP, GL_INCR);
-            drawMirror(frontMirror, FRONT, i + 1);
-        }
         glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
         glDepthMask(GL_TRUE);
 
-
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_CULL_FACE);
-        //glCullFace(GL_BACK);
-
-        //glDepthFunc(GL_LEQUAL);
-
-        for (int i = 0; i < 8; i++)
+        for (int i = 0; i <= 4; i++)
         {
-            lighting(0);
-
             glStencilFunc(GL_EQUAL, i, 0xFF);
             glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
 
             if (i % 2)
-            {
-                //glFrontFace(GL_CCW);
                 glCullFace(GL_FRONT);
-            }
             else
-            {
-                //glFrontFace(GL_CW);
                 glCullFace(GL_BACK);
-            }
+
             drawScene(FRONT, i);
-            //drawScene(BACK, i);
+        }
+
+        for (int i = 1; i <= 4; i++)
+        {
+            glStencilFunc(GL_EQUAL, i, 0xFF);
+            glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+            if (i % 2)
+                glCullFace(GL_FRONT);
+            else
+                glCullFace(GL_BACK);
+
+            drawScene(BACK, i);
         }
         glDisable(GL_CULL_FACE);
+        glDisable(GL_DEPTH_TEST);
 
         glAccum(pass ? GL_ACCUM : GL_LOAD, 1.0 / numOfPass);
     }
@@ -205,24 +170,57 @@ void Display()
     return;
 }
 
+void setStencil()
+{
+    //front
+    glStencilFunc(GL_ALWAYS, 1, 0xFF);
+    glStencilOp(GL_KEEP, GL_KEEP, GL_INCR);
+
+    drawMirror(frontMirror, FRONT, 0);
+
+    for (int i = 0; i <= 4; i++)
+    {
+        glStencilFunc(GL_EQUAL, i + 1, 0xFF);
+        glStencilOp(GL_KEEP, GL_KEEP, GL_DECR);
+
+        drawScene(FRONT, i);
+
+        glStencilFunc(GL_EQUAL, i + 1, 0xFF);
+        glStencilOp(GL_KEEP, GL_KEEP, GL_INCR);
+        drawMirror(frontMirror, FRONT, i + 1);
+    }
+
+    //back
+    glStencilFunc(GL_ALWAYS, 1, 0xFF);
+    glStencilOp(GL_KEEP, GL_KEEP, GL_INCR);
+
+    drawMirror(backMirror, BACK, 0);
+
+    for (int i = 0; i <= 4; i++)
+    {
+        glStencilFunc(GL_EQUAL, i + 1, 0xFF);
+        glStencilOp(GL_KEEP, GL_KEEP, GL_DECR);
+
+        drawScene(BACK, i);
+
+        glStencilFunc(GL_EQUAL, i + 1, 0xFF);
+        glStencilOp(GL_KEEP, GL_KEEP, GL_INCR);
+        drawMirror(backMirror, BACK, i + 1);
+    }
+
+    return;
+}
+
 void drawMirror(Model *mirror, int dir, int depth)
 {
     double displacement = 0.0;
     switch (dir)
     {
         case FRONT:
-            while (depth > 0)
-            {
-                displacement -= 80.0;
-                depth--;
-            }
+            while (depth--) displacement -= 80.0;
             break;
         case BACK:
-            while (depth > 0)
-            {
-                displacement += 80.0;
-                depth--;
-            }
+            while (depth--) displacement += 80.0;
             break;
     }
 
@@ -248,8 +246,8 @@ void drawScene(int dir, int depth)
             if (i == 1 && j >= 2) continue;
             Model *m = &scene.mComponents[i].mModels[j];
 
-            double fd = 2*fabs(m->mTransfer[X] + 40.0);
-            double bd = 2*fabs(m->mTransfer[X] - 40.0);
+            double fd = 2 * fabs(m->mTransfer[X] + 40.0);
+            double bd = 2 * fabs(m->mTransfer[X] - 40.0);
             double displacement = 0.0;
 
             int t = depth;
@@ -277,8 +275,8 @@ void drawScene(int dir, int depth)
                 m->mTransfer[Y],
                 m->mTransfer[Z]
             );
-
-            glScalef((depth % 2) ? -1.0 : 1.0, 1.0, 1.0);
+            
+            glScalef(pow(-1.0, depth), 1.0, 1.0);
             glRotatef(m->mAngle, m->mRotateAxisVec[X], m->mRotateAxisVec[Y], m->mRotateAxisVec[Z]);
             glScalef(m->mScale[X], m->mScale[Y], m->mScale[Z]);
 
@@ -331,40 +329,35 @@ void Keyboard(unsigned char key, int x, int y)
             view.mEye[X] = cos(rotateDegree)*eye_x - sin(rotateDegree)*eye_z;
             view.mEye[Z] = sin(rotateDegree)*eye_x + cos(rotateDegree)*eye_z;
 
+            cout << view.mEye[X] << " " << view.mEye[Y] << " " << view.mEye[Z] << endl;
             view.updateUnitVat();
-            printf("dis: %f\n", view.mDistance);
             break;
 
         case 'd'://move right (circle the center)
             view.mEye[X] = cos(-rotateDegree)*eye_x - sin(-rotateDegree)*eye_z;
             view.mEye[Z] = sin(-rotateDegree)*eye_x + cos(-rotateDegree)*eye_z;
 
+            cout << view.mEye[X] << " " << view.mEye[Y] << " " << view.mEye[Z] << endl;
             view.updateUnitVat();
-            printf("dis: %f\n", view.mDistance);
             break;
 
         case '1':
-            focus = 1;
-            view.mVat[X] = -10.0;
-            view.mVat[Y] = 12.0;
-            view.mVat[Z] = 0.0;
+            view.mVat.assign(-10.0, 12.0, 0.0);
             view.updateRight();
             break;
         
         case '2':
-            focus = 2;
-            view.mVat[X] = -50.0;
-            view.mVat[Y] = 12.0;
-            view.mVat[Z] = 0.0;
+            view.mVat.assign(-50.0, 12.0, 0.0);
             view.updateRight();
             break;
 
         case '3':
-            focus = 3;
-            view.mVat[X] = -400.0;
-            view.mVat[Y] = 12.0;
-            view.mVat[Z] = 0.0;
+            view.mVat.assign(-400.0, 12.0, 0.0);
             view.updateRight();
+            break;
+        
+        case '4':
+            view.mEye.assign(200, 80, 0);
             break;
     }
 

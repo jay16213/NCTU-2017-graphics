@@ -34,7 +34,7 @@ void lighting(int depth);
 void renderObj(mesh *obj, int depth);
 void drawMirror(Model *mirror, int dir, int depth);
 void drawScene(int dir, int depth);
-
+void setStencil();
 void Keyboard(unsigned char key, int x, int y);
 
 #endif

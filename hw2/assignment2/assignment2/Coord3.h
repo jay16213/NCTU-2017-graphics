@@ -66,6 +66,14 @@ public:
         }
         return;
     }
+
+    void assign(const T v1, const T v2, const T v3)
+    {
+        ptr[0] = v1;
+        ptr[1] = v2;
+        ptr[2] = v3;
+        return;
+    }
 };
 
 class Coord3f : public Coord3<float>
