@@ -120,31 +120,27 @@ void Display()
         double eye_z = view.mEye[Z] + jitter[Z];
 
         glEnable(GL_MODELVIEW);
-        glMatrixMode(GL_MODELVIEW);
+        //glMatrixMode(GL_MODELVIEW);
         glLoadIdentity();
         gluLookAt(
             eye_x, eye_y, eye_z,
             view.mVat[X], view.mVat[Y], view.mVat[Z],
             view.mVup[X], view.mVup[Y], view.mVup[Z]
-            );
-
-        //cout << "right: " << view.mRight[0] << " " << view.mRight[1] << " " << view.mRight[2] << endl;
-        //cout << "jitter: " << jitter[X] << " " << jitter[Y] << " " << jitter[Z] << endl;
-        //cout << eye_x << " " << eye_y << " " << eye_z << endl;
+        );
 
         glMatrixMode(GL_PROJECTION);
         glLoadIdentity();
         gluPerspective(view.mFovy, view.mAspect, view.mDnear, view.mDfar);
         glViewport(view.mViewport[X], view.mViewport[Y], view.mViewport[2], view.mViewport[3]);
 
-        //lighting(pass);
+        lighting(pass);
 
         glMatrixMode(GL_MODELVIEW);
 
-        glClear(GL_STENCIL_BUFFER_BIT);
+        glClear(GL_STENCIL_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
         glDepthMask(GL_FALSE);
+        glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
         glStencilFunc(GL_ALWAYS, 1, 0xFF);
         glStencilOp(GL_KEEP, GL_KEEP, GL_INCR);
 
@@ -156,7 +152,12 @@ void Display()
             glStencilOp(GL_KEEP, GL_KEEP, GL_DECR);
 
             //glEnable(GL_CULL_FACE);
-            //glCullFace(GL_FRONT);
+            /*if (i % 2 > 0)
+            {
+                glCullFace(GL_FRONT);
+            }
+            else
+                glCullFace(GL_BACK);*/
             drawScene(FRONT, i);
             //glDisable(GL_CULL_FACE);
 
@@ -164,55 +165,42 @@ void Display()
             glStencilOp(GL_KEEP, GL_KEEP, GL_INCR);
             drawMirror(frontMirror, FRONT, i + 1);
         }
-
-        //back stencil
-        /*glStencilFunc(GL_ALWAYS, 1, 0xFF);
-        glStencilOp(GL_KEEP, GL_KEEP, GL_INCR);
-
-        drawMirror(backMirror, BACK, 0);
-
-        for (int i = 0; i < 4; i++)
-        {
-        glStencilFunc(GL_EQUAL, i + 1, 0xFF);
-        glStencilOp(GL_KEEP, GL_KEEP, GL_DECR);
-
-        drawScene(BACK, i);
-
-        glStencilFunc(GL_EQUAL, i + 1, 0xFF);
-        glStencilOp(GL_KEEP, GL_KEEP, GL_INCR);
-        drawMirror(frontMirror, BACK, i + 1);
-        }*/
-        glDepthMask(GL_TRUE);
         glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+        glDepthMask(GL_TRUE);
+
+
+        glEnable(GL_DEPTH_TEST);
+        glEnable(GL_CULL_FACE);
+        //glCullFace(GL_BACK);
+
+        //glDepthFunc(GL_LEQUAL);
 
         for (int i = 0; i < 8; i++)
         {
-            glEnable(GL_DEPTH_TEST);
-            glDepthFunc(GL_LEQUAL);
+            lighting(0);
 
             glStencilFunc(GL_EQUAL, i, 0xFF);
             glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
 
-            glEnable(GL_CULL_FACE);
             if (i % 2)
             {
+                //glFrontFace(GL_CCW);
                 glCullFace(GL_FRONT);
-                glFrontFace(GL_CW);
             }
             else
             {
+                //glFrontFace(GL_CW);
                 glCullFace(GL_BACK);
-                glFrontFace(GL_CCW);
             }
-            lighting(i);
             drawScene(FRONT, i);
             //drawScene(BACK, i);
-            glDisable(GL_CULL_FACE);
         }
+        glDisable(GL_CULL_FACE);
 
         glAccum(pass ? GL_ACCUM : GL_LOAD, 1.0 / numOfPass);
     }
     glAccum(GL_RETURN, 1.0);
+
     glFlush();
     return;
 }
@@ -284,12 +272,13 @@ void drawScene(int dir, int depth)
             }
 
             glPushMatrix();
-
             glTranslatef(
                 m->mTransfer[X] + displacement,
                 m->mTransfer[Y],
                 m->mTransfer[Z]
             );
+
+            glScalef((depth % 2) ? -1.0 : 1.0, 1.0, 1.0);
             glRotatef(m->mAngle, m->mRotateAxisVec[X], m->mRotateAxisVec[Y], m->mRotateAxisVec[Z]);
             glScalef(m->mScale[X], m->mScale[Y], m->mScale[Z]);
 
