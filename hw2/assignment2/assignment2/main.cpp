@@ -101,13 +101,10 @@ void Display()
         cout << "--------------------------------" << endl;
         cout << "pass " << pass << endl;
 
-        //if (pass)
-        {
-            for (int i = 0; i < 3; i++)
-                jitter[i] = view.mRight[i] * cos((angle * pass) * c) + view.mVup[i] * sin((angle * pass) * c);
-            double len = jitter.vecLen() * 5;//jitter distance to 0.2
-            for (int i = 0; i < 3; i++) jitter[i] = jitter[i] / len;
-        }
+        for (int i = 0; i < 3; i++)
+            jitter[i] = view.mRight[i] * cos((angle * pass) * c) + view.mVup[i] * sin((angle * pass) * c);
+        double len = jitter.vecLen() * 5;//jitter distance to 0.2
+        for (int i = 0; i < 3; i++) jitter[i] = jitter[i] / len;
         
         glEnable(GL_MODELVIEW);
         glMatrixMode(GL_MODELVIEW);
@@ -136,6 +133,7 @@ void Display()
         glDepthMask(GL_TRUE);
 
         glEnable(GL_DEPTH_TEST);
+        glDepthFunc(GL_LEQUAL);
         glEnable(GL_CULL_FACE);
         for (int i = 0; i < 4; i++)
         {
@@ -247,8 +245,8 @@ void drawScene(int dir, int depth)
             if (i == 1 && j >= 2) continue;
             Model *m = &scene.mComponents[i].mModels[j];
 
-            float fd = 2 * fabs(m->mTransfer[X] + 40.0);
-            float bd = 2 * fabs(m->mTransfer[X] - 40.0);
+            float fd = 2 * fabs(m->mTransfer[X] + 40);
+            float bd = 2 * fabs(m->mTransfer[X] - 40);
             float displacement = 0.0;
 
             int t = depth;
