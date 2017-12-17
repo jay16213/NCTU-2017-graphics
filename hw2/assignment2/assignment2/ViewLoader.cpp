@@ -106,18 +106,17 @@ int ViewLoader::loadView(string view_file)
 void ViewLoader::updateUnitVat()
 {
     Coord3d v(mVat[0] - mEye[0], mVat[1] - mEye[1], mVat[2] - mEye[2]);
-    double len = v.vecLen();
-    for (int i = 0; i < 3; i++)
-        mUnitVat[i] = (double)(v[i] / len);
-
-    printf("uptate unit: %f %f %f\n", mUnitVat[0], mUnitVat[1], mUnitVat[2]);
+    
+    v.normalize();
+    mUnitVat = v;
+    //printf("uptate unit: %f %f %f\n", mUnitVat[0], mUnitVat[1], mUnitVat[2]);
 }
 
 void ViewLoader::updateDistance()
 {
     Coord3d v(mVat[0] - mEye[0], mVat[1] - mEye[1], mVat[2] - mEye[2]);
     mDistance = v.vecLen();
-    cout << "update dis " << mDistance << endl;
+    //cout << "update dis " << mDistance << endl;
     return;
 }
 
@@ -130,13 +129,7 @@ void ViewLoader::updateRight()
     mRight[1] = (v[2] * mVup[0]) - (v[0] * mVup[2]);//z1x2 - x1z2
     mRight[2] = (v[0] * mVup[1]) - (v[1] * mVup[0]);//y1z2 - z1y2
 
-    double len = mRight.vecLen();
-    for (int i = 0; i < 3; i++)
-    {
-        mRight[i] = mRight[i] / len;
-        if (mRight[i] == 0) mRight[i] = 0.0;
-    }
-
+    mRight.normalize();
     cout << "right: " << mRight[0] << " " << mRight[1] << " " << mRight[2] << endl;
     return;
 }

@@ -19,9 +19,13 @@ void renderObj(mesh *obj, int depth)
 
         glBegin(GL_TRIANGLES);
         for (size_t j = 0; j < 3; j++)
-        {
+        {            
             glNormal3fv(obj->nList[obj->faceList[i][j].n].ptr);
-            glVertex3fv(obj->vList[obj->faceList[i][j].v].ptr);
+            glVertex3f(
+                obj->vList[obj->faceList[i][j].v].ptr[X],
+                obj->vList[obj->faceList[i][j].v].ptr[Y],
+                obj->vList[obj->faceList[i][j].v].ptr[Z]
+            );
         }
         glEnd();
     }

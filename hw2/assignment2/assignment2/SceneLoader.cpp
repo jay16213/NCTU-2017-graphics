@@ -1,7 +1,7 @@
 #include "SceneLoader.h"
 
-SceneLoader::SceneLoader() { mNumOfTextures = 0; }
-SceneLoader::~SceneLoader() { }
+SceneLoader::SceneLoader() { mNumOfTextures = 0; files = new Srcpath; }
+SceneLoader::~SceneLoader() {}
 
 int SceneLoader::loadScene(string scene_file)
 {
@@ -52,13 +52,14 @@ int SceneLoader::loadScene(string scene_file)
     mComponents.push_back(Component(tex, models));
     
     scene.close();
+    delete files;
     return 0;
 }
 
 int SceneLoader::getObjId(string obj)
 {
-    for (size_t i = 0; i < files.oNames.size(); i++)
-        if (obj == files.oNames[i]) return i;
+    for (size_t i = 0; i < files->oNames.size(); i++)
+        if (obj == files->oNames[i]) return i;
 
     cout << "get Obj id of " << obj << " error" << endl;
     system("pause");

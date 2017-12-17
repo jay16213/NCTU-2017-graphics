@@ -53,7 +53,18 @@ public:
     T vecLen()
     {
         T len2 = (ptr[0] * ptr[0]) + (ptr[1] * ptr[1]) + (ptr[2] * ptr[2]);
-        return sqrt(len2);
+        return (T) sqrt(len2);
+    }
+
+    void normalize()
+    {
+        T len = vecLen();
+        for (int i = 0; i < 3; i++)
+        {
+            ptr[i] = ptr[i] / len;
+            if (ptr[i] == 0) ptr[i] = 0.0;
+        }
+        return;
     }
 };
 

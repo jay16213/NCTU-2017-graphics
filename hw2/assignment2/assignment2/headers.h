@@ -24,13 +24,16 @@ using namespace std;
 #define Y 1
 #define Z 2
 
+#define FRONT 10
+#define BACK 20
+
 void Display();
 void ReShape(int w, int h);
 void objViewTransform(int depth);
 void lighting(int depth);
 void renderObj(mesh *obj, int depth);
-void drawMirror(Model *mirror, int depth);
-void drawScene(int depth);
+void drawMirror(Model *mirror, int dir, int depth);
+void drawScene(int dir, int depth);
 
 void Keyboard(unsigned char key, int x, int y);
 

@@ -50,7 +50,7 @@ public:
 private:
     int getObjId(string obj);
     int getImgFileId(string tex);
-    Srcpath files;
+    Srcpath *files;
 };
 
 #endif
