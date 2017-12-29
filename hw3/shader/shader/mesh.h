@@ -108,13 +108,13 @@ public:
 
 	size_t	vTotal, tTotal, nTotal, fTotal; // number of total vertice, faces, texture coord., normal vecters, and faces
 
-    void	LoadMesh(std::string scene_file);
+    void	LoadMesh(std::string scene_file, int res);
 	
 	mesh();
-    mesh(std::string obj_file);
+    mesh(std::string obj_file, int res);
 	virtual ~mesh();
 
-    void Init(std::string obj_file);
+    void Init(std::string obj_file, int res);
 
 private:
 	FILE		*fp_mtl;

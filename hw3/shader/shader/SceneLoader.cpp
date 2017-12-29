@@ -3,7 +3,7 @@
 SceneLoader::SceneLoader() { mNumOfTextures = 0; files = new Srcpath; }
 SceneLoader::~SceneLoader() {}
 
-int SceneLoader::loadScene(string scene_file)
+int SceneLoader::loadScene(string scene_file, int res)
 {
     ifstream scene(scene_file, ios::in);
     if(scene.fail())
@@ -45,7 +45,7 @@ int SceneLoader::loadScene(string scene_file)
             ss >> angle >> rAv[0] >> rAv[1] >> rAv[2];
             ss >> t[0] >> t[1] >> t[2];
 
-            int objIndex = getObjId(obj_name);
+            int objIndex = getObjId(obj_name, res);
             models.push_back(Model(objIndex, angle, Coord3f(rAv), Coord3f(s), Coord3f(t)));
         }
     }
@@ -56,10 +56,16 @@ int SceneLoader::loadScene(string scene_file)
     return 0;
 }
 
-int SceneLoader::getObjId(string obj)
+int SceneLoader::getObjId(string obj, int res)
 {
     for (size_t i = 0; i < files->oNames.size(); i++)
-        if (obj == files->oNames[i]) return i;
+    {
+        if (obj == files->oNames[i])
+        {
+            if (res == 2) return i - 1;
+            else return i;
+        }
+    }
 
     cout << "get Obj id of " << obj << " error" << endl;
     system("pause");

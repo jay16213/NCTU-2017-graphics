@@ -10,13 +10,36 @@ vector<mesh> objs;
 int main(int argc, char **argv)
 {
     Srcpath *files = new Srcpath();
-    for (size_t i = 0; i < files->oNames.size(); i++)
-        objs.push_back(mesh(files->oNames[i]));
-
-    view.loadView("view.view");
-    scene.loadScene("scene.scene");
-    light.loadLight("light.light");
-
+    int res;
+    cout << "Choose the scene(1: subdivision/2: phong shaging): ";
+    while (cin >> res)
+    {
+        if (res == 1)
+        {
+            objs.push_back(mesh(string("gem/gem.obj"), res));
+            view.loadView(files->srcRootPath_sub + string("as3.view"));
+            scene.loadScene(files->srcRootPath_sub + string("as3.scene"), res);
+            light.loadLight(files->srcRootPath_sub + string("as3.light"));
+            break;
+        }
+        else if (res == 2)
+        {
+            objs.push_back(mesh(string("phong/box.obj"), res));
+            objs.push_back(mesh(string("phong/bunny.obj"), res));
+            objs.push_back(mesh(string("phong/venus.obj"), res));
+            view.loadView(files->srcRootPath_pho + string("view.view"));
+            scene.loadScene(files->srcRootPath_pho + string("scene.scene"), res);
+            light.loadLight(files->srcRootPath_pho + string("light.light"));
+            break;
+        }
+        else
+        {
+            cout << "Invalid choice" << endl;
+            continue;
+        }
+    }
+    delete files;
+    
     gw = view.mViewport[2];
     gh = view.mViewport[3];
 

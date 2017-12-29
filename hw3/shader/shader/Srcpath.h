@@ -11,7 +11,10 @@ public:
     Srcpath()
     {
         //park
-        srcRootPath.assign("");
+        srcRootPath_sub.assign("gem/");
+        oNames.push_back(string("gem.obj"));
+
+        srcRootPath_pho.assign("phong/");
         oNames.push_back(string("box.obj"));
         oNames.push_back(string("bunny.obj"));
         oNames.push_back(string("venus.obj"));
@@ -20,7 +23,8 @@ public:
 
     vector<string> oNames;//obj file
 
-    string srcRootPath;
+    string srcRootPath_sub;
+    string srcRootPath_pho;
 };
 
 #endif

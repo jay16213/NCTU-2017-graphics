@@ -42,13 +42,13 @@ public:
     SceneLoader();
     ~SceneLoader();
 
-    int loadScene(string scene_file);
+    int loadScene(string scene_file, int res);
 
     int mNumOfTextures;             // = numOfSingle*1 + numOfMulti*2 + numOfCube*1
     vector<Component> mComponents;
 
 private:
-    int getObjId(string obj);
+    int getObjId(string obj, int res);
     int getImgFileId(string tex);
     Srcpath *files;
 };
