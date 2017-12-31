@@ -57,7 +57,7 @@ void renderWithSingleTex(mesh *obj, unsigned int *texObj, int texType, int texOb
         }
 
         glBegin(GL_TRIANGLES);
-        for (size_t j = 0; j<3; j++)
+        for (size_t j = 0; j < 3; j++)
         {
             glMultiTexCoord2fv(GL_TEXTURE0, obj->tList[obj->faceList[i][j].t].ptr);
             glNormal3fv(obj->nList[obj->faceList[i][j].n].ptr);
