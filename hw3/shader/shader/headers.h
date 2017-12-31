@@ -29,10 +29,14 @@ void Display();
 void ReShape(int w, int h);
 void objViewTransform(int depth);
 void lighting();
-void renderObj(mesh *obj);
+void loadTexture(Texture *tex, unsigned int *texObj, int *texObjIndex);
+void loadSingleTexture(Texture *tex, unsigned int *texObj, int *texObjIndex);
+void renderObj(mesh *obj, unsigned int *texObj, int texType, int texObjIndex);
+void renderWithNoTex(mesh *obj);
+void renderWithSingleTex(mesh *obj, unsigned int *texObj, int texType, int texObjIndex);
 void Keyboard(unsigned char key, int x, int y);
 void changeSize(int w, int h);
 
-void LoadShaders();
+void LoadShaders(int res);
 
 #endif

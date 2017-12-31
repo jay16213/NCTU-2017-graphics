@@ -28,37 +28,12 @@ int LightLoader::loadLight(string light_file)
             light >> s[0] >> s[1] >> s[2];
 
             mObjLight.push_back(LightInfo(p, a, d, s));
-            printf("position: %f %f %f %f\n",
-                    mObjLight.back().mPosition[0],
-                    mObjLight.back().mPosition[1],
-                    mObjLight.back().mPosition[2],
-                    mObjLight.back().mPosition[3]
-            );
-            printf("a: %f %f %f\n",
-                mObjLight.back().mAmbient[0],
-                mObjLight.back().mAmbient[1],
-                mObjLight.back().mAmbient[2],
-                mObjLight.back().mAmbient[3]
-            );
-            printf("d: %f %f %f\n",
-                mObjLight.back().mDiffuse[0],
-                mObjLight.back().mDiffuse[1],
-                mObjLight.back().mDiffuse[2],
-                mObjLight.back().mDiffuse[3]
-            );
-            printf("s: %f %f %f\n",
-                mObjLight.back().mSpecular[0],
-                mObjLight.back().mSpecular[1],
-                mObjLight.back().mSpecular[2],
-                mObjLight.back().mSpecular[3]
-           );
         }
         else if (strcmp(param_name, "ambient") == 0)
         {
             float ambient[3];
             light >> ambient[0] >> ambient[1] >> ambient[2];
             for (int i = 0; i < 3; i++) mEnvAmbient[i] = ambient[i];
-            printf("env ambient: %f %f %f\n", mEnvAmbient[0], mEnvAmbient[1], mEnvAmbient[2]);
         }
     }
     

@@ -1,6 +1,6 @@
 #include "SceneLoader.h"
 
-SceneLoader::SceneLoader() { mNumOfTextures = 0; files = new Srcpath; }
+SceneLoader::SceneLoader() { mNumOfTextures = 0; files = new Srcpath(); }
 SceneLoader::~SceneLoader() {}
 
 int SceneLoader::loadScene(string scene_file, int res)
@@ -11,8 +11,7 @@ int SceneLoader::loadScene(string scene_file, int res)
         printf("Can not open the scene file '%s'\n", scene_file.c_str());
         return -1;
     }
-    cout << "Load the scene info..." << endl;
-    
+    cout << "Load the scene info...";
     
     string line, param;
     int insert = 0;
@@ -23,7 +22,7 @@ int SceneLoader::loadScene(string scene_file, int res)
         stringstream ss(line);
         ss >> param;
 
-        if (param == "no-texture")
+        if (param == "single-texture")
         {
             if (insert)
             {
@@ -32,7 +31,10 @@ int SceneLoader::loadScene(string scene_file, int res)
                 insert = 0;
             }
 
-            tex = Texture(NO_TEXTURE, vector<int>());
+            ss >> param;
+            int imgIndex = getImgFileId(param);
+            mNumOfTextures++;
+            tex = Texture(SINGLE_TEXTURE, vector<int>(1, imgIndex));
         }
         else if (param == "model")
         {
@@ -51,6 +53,7 @@ int SceneLoader::loadScene(string scene_file, int res)
     }
     mComponents.push_back(Component(tex, models));
     
+    cout << "Success" << endl;
     scene.close();
     delete files;
     return 0;
@@ -75,10 +78,10 @@ int SceneLoader::getObjId(string obj, int res)
 
 int SceneLoader::getImgFileId(string tex)
 {
-    //for (size_t i = 0; i < files.tNames.size(); i++)
-    //{
-    //    if (tex == files.tNames[i]) return i;
-    //}
+    for (size_t i = 0; i < files->tNames.size(); i++)
+    {
+        if (tex == files->tNames[i]) return i;
+    }
 
     cout << "get Tex id error" << endl;
     system("pause");

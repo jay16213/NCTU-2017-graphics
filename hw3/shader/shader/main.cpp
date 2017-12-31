@@ -2,16 +2,24 @@
 
 int gw, gh;				//Keep track of window width and height
 GLhandleARB	MyShader;
+
+Srcpath *files;
 ViewLoader view;
 SceneLoader scene;
 LightLoader light;
 vector<mesh> objs;
 
+GLuint texObj[1];
+int texObjIndex = 0;
+
+int res;
+int level = 0;
+
 int main(int argc, char **argv)
 {
-    Srcpath *files = new Srcpath();
-    int res;
+    files = new Srcpath();
     cout << "Choose the scene(1: subdivision/2: phong shaging): ";
+
     while (cin >> res)
     {
         if (res == 1)
@@ -38,7 +46,6 @@ int main(int argc, char **argv)
             continue;
         }
     }
-    delete files;
     
     gw = view.mViewport[2];
     gh = view.mViewport[3];
@@ -46,12 +53,8 @@ int main(int argc, char **argv)
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
     glutInitWindowPosition(0, 0);
-    glutInitWindowSize(800, 800);
+    glutInitWindowSize(view.mViewport[2], view.mViewport[3]);
     glutCreateWindow("Assignment 3");
-
-    glutDisplayFunc(Display);
-    glutReshapeFunc(changeSize);
-    glutKeyboardFunc(Keyboard);
 
     glewInit();
     if (glewIsSupported("GL_VERSION_2_1"))
@@ -67,19 +70,42 @@ int main(int argc, char **argv)
         exit(1);
     }
 
-    LoadShaders();
+    glutDisplayFunc(Display);
+    glutReshapeFunc(changeSize);
+    glutKeyboardFunc(Keyboard);
 
+    if (res == 1)
+    {
+        Texture *tex = &scene.mComponents[0].mTex;
+        glGenTextures(scene.mNumOfTextures, texObj);
+        FreeImage_Initialise();
+        loadTexture(tex, texObj, &texObjIndex);
+        FreeImage_DeInitialise();
+    }
+
+    LoadShaders(res);
     glutMainLoop();
+
+    delete files;
     return 0;
 }
 
-void LoadShaders()
+void LoadShaders(int res)
 {
     MyShader = glCreateProgram();
     if (MyShader != 0)
     {
-        ShaderLoad(MyShader, "../shader/vertexShader.vert", GL_VERTEX_SHADER);
-        ShaderLoad(MyShader, "../shader/fragShader.frag", GL_FRAGMENT_SHADER);
+        if (res == 1)
+        {
+            ShaderLoad(MyShader, "../shader/vertexShader_s.vert", GL_VERTEX_SHADER);
+            ShaderLoad(MyShader, "../shader/geomShader_s.geom", GL_GEOMETRY_SHADER);
+            ShaderLoad(MyShader, "../shader/fragShader_s.frag", GL_FRAGMENT_SHADER);
+        }
+        else
+        {
+            ShaderLoad(MyShader, "../shader/vertexShader_p.vert", GL_VERTEX_SHADER);
+            ShaderLoad(MyShader, "../shader/fragShader_p.frag", GL_FRAGMENT_SHADER);
+        }
     }
 }
 
@@ -87,7 +113,7 @@ void lighting()
 {
     //enable lighting
     glEnable(GL_LIGHTING);
-    glShadeModel(GL_SMOOTH);
+    //glShadeModel(GL_SMOOTH);
 
     //set light property
     for (size_t i = 0; i < light.mObjLight.size(); i++)
@@ -127,13 +153,23 @@ void Display()
     glUseProgram(MyShader);
     glUniform1i(glGetUniformLocation(MyShader, "lightNumber"), light.mObjLight.size());
 
+    if (res == 1)
+    {
+        glActiveTexture(GL_TEXTURE0);
+        glEnable(GL_TEXTURE_2D);
+        glBindTexture(GL_TEXTURE_2D, texObj[0]);
+        glUniform1i(glGetUniformLocation(MyShader, "colorTexture"), 0);
+        glUniform1i(glGetUniformLocation(MyShader, "level"), level);
+        glUniform1f(glGetUniformLocation(MyShader, "radius"), 1.0f);
+        glUniform4f(glGetUniformLocation(MyShader, "Centroid"), 0.0f, 1.0f, 0.0f, 1.0f);
+    }
+
     lighting();
 
-    glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LEQUAL);
-
-    for (int i = 0; i < scene.mComponents.size(); i++)
+    for (size_t i = 0; i < scene.mComponents.size(); i++)
     {
+        Texture *tex = &scene.mComponents[0].mTex;
+
         for (int j = 0; j < scene.mComponents[i].mNumOfModels; j++)
         {
             Model *m = &scene.mComponents[i].mModels[j];
@@ -142,11 +178,12 @@ void Display()
             glRotatef(m->mAngle, m->mRotateAxisVec[X], m->mRotateAxisVec[Y], m->mRotateAxisVec[Z]);
             glScalef(m->mScale[X], m->mScale[Y], m->mScale[Z]);
 
-            renderObj(&objs[m->mObjIndex]);
+            renderObj(&objs[m->mObjIndex], texObj, tex->mType, texObjIndex);
             glPopMatrix();
         }
     }
 
+    glFlush();
     glUseProgram(0);
     glutSwapBuffers();
     return;
@@ -156,7 +193,7 @@ void Keyboard(unsigned char key, int x, int y)
 {
     double eye_x = view.mEye[X];
     double eye_z = view.mEye[Z];
-    double zoomDegree = 5.0;
+    double zoomDegree = (res == 1) ? 0.06 : 5.0;
     double rotateDegree = M_PI / 180;
 
     switch (key)
@@ -191,6 +228,28 @@ void Keyboard(unsigned char key, int x, int y)
 
             cout << view.mEye[X] << " " << view.mEye[Y] << " " << view.mEye[Z] << endl;
             view.updateUnitVat();
+            break;
+
+        case 'f'://move the light position(y--)
+            for (size_t i = 0; i < light.mObjLight.size(); i++)
+            {
+                light.mObjLight[i].mPosition[Y] -= 10;
+            }
+            break;
+        case 'r'://move the light position(y++)
+            for (size_t i = 0; i < light.mObjLight.size(); i++)
+            {
+                light.mObjLight[i].mPosition[Y] += 10;
+            }
+            break;
+        case '0':
+            level = 0;
+            break;
+        case '1':
+            level = 1;
+            break;
+        case '2':
+            level = 2;
             break;
     }
 

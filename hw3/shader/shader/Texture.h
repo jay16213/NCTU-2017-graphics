@@ -12,7 +12,7 @@
 class Texture
 {
 public:
-    Texture() {}
+    Texture() { mType = NO_TEXTURE; }
     Texture(int type, std::vector<int> imgIndex)
     {
         mType = type;

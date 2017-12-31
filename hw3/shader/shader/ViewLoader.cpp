@@ -12,7 +12,8 @@ int ViewLoader::loadView(string view_file)
         cout << "Can not open the view file '" << view_file << "'" << endl;
         return -1;
     }
-    
+    cout << "Load view info...";
+
     char param_name[20];
     while(!view.eof())
     {
@@ -89,6 +90,7 @@ int ViewLoader::loadView(string view_file)
         }
     }
     
+    cout << "Success" << endl;
     view.close();
     return 0;
 }

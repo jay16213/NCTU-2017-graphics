@@ -36,6 +36,9 @@
     <ClCompile Include="ShaderLoader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="loadTexture.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="headers.h">
@@ -70,8 +73,10 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="fragShader.frag" />
-    <None Include="geomShader.geom" />
-    <None Include="vertexShader.vert" />
+    <None Include="fragShader_p.frag" />
+    <None Include="vertexShader_p.vert" />
+    <None Include="fragShader_s.frag" />
+    <None Include="geomShader_s.geom" />
+    <None Include="vertexShader_s.vert" />
   </ItemGroup>
 </Project>
