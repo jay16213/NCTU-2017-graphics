@@ -16,7 +16,7 @@ int res;
 int level = 0;
 
 double zoomDegree;
-double rotateDegree = M_PI / 36;
+double rotateDegree = M_PI / 36.0;
 
 int main(int argc, char **argv)
 {
@@ -31,7 +31,7 @@ int main(int argc, char **argv)
             view.loadView(files->srcRootPath_sub + string("as3.view"));
             scene.loadScene(files->srcRootPath_sub + string("as3.scene"), res);
             light.loadLight(files->srcRootPath_sub + string("as3.light"));
-            double zoomDegree = 0.06;
+            zoomDegree = 0.06;
             break;
         }
         else if (res == 2)
@@ -42,7 +42,7 @@ int main(int argc, char **argv)
             view.loadView(files->srcRootPath_pho + string("view.view"));
             scene.loadScene(files->srcRootPath_pho + string("scene.scene"), res);
             light.loadLight(files->srcRootPath_pho + string("light.light"));
-            double zoomDegree = 5.0;
+            zoomDegree = 5.0;
             break;
         }
         else
@@ -118,7 +118,7 @@ void lighting()
 {
     //enable lighting
     glEnable(GL_LIGHTING);
-    //glShadeModel(GL_SMOOTH);
+    glShadeModel(GL_SMOOTH);
 
     //set light property
     for (size_t i = 0; i < light.mObjLight.size(); i++)
@@ -206,7 +206,6 @@ void Keyboard(unsigned char key, int x, int y)
             view.mEye[X] += view.mUnitVat[X] * zoomDegree;
             view.mEye[Y] += view.mUnitVat[Y] * zoomDegree;
             view.mEye[Z] += view.mUnitVat[Z] * zoomDegree;
-            view.updateUnitVat();
             view.updateDistance();
             break;
 
@@ -214,7 +213,6 @@ void Keyboard(unsigned char key, int x, int y)
             view.mEye[X] -= view.mUnitVat[X] * zoomDegree;
             view.mEye[Y] -= view.mUnitVat[Y] * zoomDegree;
             view.mEye[Z] -= view.mUnitVat[Z] * zoomDegree;
-            view.updateUnitVat();
             view.updateDistance();
             break;
 
