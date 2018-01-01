@@ -15,6 +15,9 @@ int texObjIndex = 0;
 int res;
 int level = 0;
 
+double zoomDegree;
+double rotateDegree = M_PI / 36;
+
 int main(int argc, char **argv)
 {
     files = new Srcpath();
@@ -28,6 +31,7 @@ int main(int argc, char **argv)
             view.loadView(files->srcRootPath_sub + string("as3.view"));
             scene.loadScene(files->srcRootPath_sub + string("as3.scene"), res);
             light.loadLight(files->srcRootPath_sub + string("as3.light"));
+            double zoomDegree = 0.06;
             break;
         }
         else if (res == 2)
@@ -38,6 +42,7 @@ int main(int argc, char **argv)
             view.loadView(files->srcRootPath_pho + string("view.view"));
             scene.loadScene(files->srcRootPath_pho + string("scene.scene"), res);
             light.loadLight(files->srcRootPath_pho + string("light.light"));
+            double zoomDegree = 5.0;
             break;
         }
         else
@@ -191,10 +196,9 @@ void Display()
 
 void Keyboard(unsigned char key, int x, int y)
 {
-    double eye_x = view.mEye[X];
-    double eye_z = view.mEye[Z];
-    double zoomDegree = (res == 1) ? 0.06 : 5.0;
-    double rotateDegree = M_PI / 180;
+    double ax = view.mEye[X] - view.mVat[X];
+    double ay = view.mEye[Y] - view.mVat[Y];
+    double az = view.mEye[Z] - view.mVat[Z];
 
     switch (key)
     {
@@ -215,18 +219,14 @@ void Keyboard(unsigned char key, int x, int y)
             break;
 
         case 'a'://move left (circle the center)
-            view.mEye[X] = cos(rotateDegree)*eye_x - sin(rotateDegree)*eye_z;
-            view.mEye[Z] = sin(rotateDegree)*eye_x + cos(rotateDegree)*eye_z;
-
-            cout << view.mEye[X] << " " << view.mEye[Y] << " " << view.mEye[Z] << endl;
+            view.mEye[X] = cos(rotateDegree)*ax - sin(rotateDegree)*az + view.mVat[X];
+            view.mEye[Z] = sin(rotateDegree)*ax + cos(rotateDegree)*az + view.mVat[Z];
             view.updateUnitVat();
             break;
 
-        case 'd'://move right (circle the center)
-            view.mEye[X] = cos(-rotateDegree)*eye_x - sin(-rotateDegree)*eye_z;
-            view.mEye[Z] = sin(-rotateDegree)*eye_x + cos(-rotateDegree)*eye_z;
-
-            cout << view.mEye[X] << " " << view.mEye[Y] << " " << view.mEye[Z] << endl;
+        case 'd'://move right (circle the center)   
+            view.mEye[X] = cos(-rotateDegree)*ax - sin(-rotateDegree)*az + view.mVat[X];
+            view.mEye[Z] = sin(-rotateDegree)*ax + cos(-rotateDegree)*az + view.mVat[Z];
             view.updateUnitVat();
             break;
 

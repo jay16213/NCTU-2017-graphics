@@ -109,19 +109,19 @@ void main()
                 v01.position = normalize(0.5*p0 + 0.5*p1) * radius + c;
                 v01.normal = normalize(v01.position).xyz;
                 v01.vertexEyeSpace = v01.position.xyz/*normalize((v0.vertexEyeSpace - c.xyz) + (v1.vertexEyeSpace - c.xyz)) * radius + c.xyz*/;
-                v01._texcoord = (v0._texcoord + v1._texcoord) / 2.0;
+                v01._texcoord = 0.5*v0._texcoord + 0.5*v1._texcoord;
 
                 //v12
                 v12.position = normalize(0.5*p1 + 0.5*p2) * radius + c;
                 v12.normal = normalize(v12.position).xyz;
                 v12.vertexEyeSpace = v12.position.xyz/*normalize((v1.vertexEyeSpace - c.xyz) + (v2.vertexEyeSpace - c.xyz)) * radius + c.xyz*/;
-                v12._texcoord = (v1._texcoord + v2._texcoord) / 2.0;
+                v12._texcoord = 0.5*v1._texcoord + 0.5*v2._texcoord;
 
                 //v02
                 v02.position = normalize(0.5*p0 + 0.5*p2) * radius + c;
                 v02.normal = normalize(v02.position).xyz;
                 v02.vertexEyeSpace = v02.position.xyz/*normalize((v0.vertexEyeSpace - c.xyz) + (v2.vertexEyeSpace - c.xyz)) * radius + c.xyz*/;
-                v02._texcoord = (v0._texcoord + v2._texcoord) / 2.0;
+                v02._texcoord = 0.5*v0._texcoord + 0.5*v2._texcoord;
                 //-------------------------------------------------------------------
 
                 outputVert(v02);
