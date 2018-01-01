@@ -3,9 +3,9 @@
 uniform sampler2D colorTexture;
 uniform int lightNumber;
 
-in vec2 tex;
 in vec3 vertexEyeSpace;
 in vec3 normal;
+in vec2 tex;
 
 void main()
 {
@@ -31,5 +31,5 @@ void main()
     }
 
     //combine tex color & phong lighting color by multiply
-    gl_FragColor = texture(colorTexture, tex.xy)/* * vec4(finalFragColor)*/;
+    gl_FragColor = texture(colorTexture, tex) * vec4(finalFragColor);
 }

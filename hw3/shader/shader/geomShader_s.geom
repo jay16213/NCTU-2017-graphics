@@ -38,7 +38,6 @@ in Vertex {
 out vec3 vertexEyeSpace;
 out vec3 normal;
 out vec2 tex;
-out vec4 gl_Position;
 
 struct Vert {
     vec3 vertexEyeSpace;
@@ -107,20 +106,20 @@ void main()
 
                 //v01
                 v01.position = normalize(0.5*p0 + 0.5*p1) * radius + c;
-                v01.normal = normalize(v01.position).xyz;
-                v01.vertexEyeSpace = v01.position.xyz/*normalize((v0.vertexEyeSpace - c.xyz) + (v1.vertexEyeSpace - c.xyz)) * radius + c.xyz*/;
+                v01.normal = normalize(v0.normal + v1.normal);
+                v01.vertexEyeSpace = v01.position.xyz;
                 v01._texcoord = 0.5*v0._texcoord + 0.5*v1._texcoord;
 
                 //v12
                 v12.position = normalize(0.5*p1 + 0.5*p2) * radius + c;
-                v12.normal = normalize(v12.position).xyz;
-                v12.vertexEyeSpace = v12.position.xyz/*normalize((v1.vertexEyeSpace - c.xyz) + (v2.vertexEyeSpace - c.xyz)) * radius + c.xyz*/;
+                v12.normal = normalize(v1.normal + v2.normal);
+                v12.vertexEyeSpace = v12.position.xyz;
                 v12._texcoord = 0.5*v1._texcoord + 0.5*v2._texcoord;
 
                 //v02
                 v02.position = normalize(0.5*p0 + 0.5*p2) * radius + c;
-                v02.normal = normalize(v02.position).xyz;
-                v02.vertexEyeSpace = v02.position.xyz/*normalize((v0.vertexEyeSpace - c.xyz) + (v2.vertexEyeSpace - c.xyz)) * radius + c.xyz*/;
+                v02.normal = normalize(v0.normal + v2.normal);
+                v02.vertexEyeSpace = v02.position.xyz;
                 v02._texcoord = 0.5*v0._texcoord + 0.5*v2._texcoord;
                 //-------------------------------------------------------------------
 
@@ -171,49 +170,49 @@ void main()
                 struct Vert v120, v121, v122;
 
                 v010.position = normalize(0.75*p0 + 0.25*p1) * radius + c;
-                v010.normal = normalize(v010.position).xyz;
+                v010.normal = normalize(0.75*v0.normal + 0.25*v1.normal);
                 v010.vertexEyeSpace = v010.position.xyz;
                 v010._texcoord = 0.75*v0._texcoord + 0.25*v1._texcoord;
 
                 v011.position = normalize(0.50*p0 + 0.50*p1) * radius + c;
-                v011.normal = normalize(v011.position).xyz;
+                v011.normal = normalize(0.50*v0.normal + 0.50*v1.normal);
                 v011.vertexEyeSpace = v011.position.xyz;
                 v011._texcoord = 0.50*v0._texcoord + 0.50*v1._texcoord;
 
                 v012.position = normalize(0.25*p0 + 0.75*p1) * radius + c;
-                v012.normal = normalize(v012.position).xyz;
+                v012.normal = normalize(0.25*v0.normal + 0.75*v1.normal);
                 v012.vertexEyeSpace = v012.position.xyz;
                 v012._texcoord = 0.25*v0._texcoord + 0.75*v1._texcoord;
 
 
                 v120.position = normalize(0.75*p1 + 0.25*p2) * radius + c;
-                v120.normal = normalize(v120.position).xyz;
+                v120.normal = normalize(0.75*v1.normal + 0.25*v2.normal);
                 v120.vertexEyeSpace = v120.position.xyz;
                 v120._texcoord = 0.75*v1._texcoord + 0.25*v2._texcoord;
 
                 v121.position = normalize(0.50*p1 + 0.50*p2) * radius + c;
-                v121.normal = normalize(v121.position).xyz;
+                v121.normal = normalize(0.50*v1.normal + 0.50*v2.normal);
                 v121.vertexEyeSpace = v121.position.xyz;
                 v121._texcoord = 0.50*v1._texcoord + 0.50*v2._texcoord;
 
                 v122.position = normalize(0.25*p1 + 0.75*p2) * radius + c;
-                v122.normal = normalize(v122.position).xyz;
+                v122.normal = normalize(0.25*v1.normal + 0.75*v2.normal);
                 v122.vertexEyeSpace = v122.position.xyz;
                 v122._texcoord = 0.25*v1._texcoord + 0.75*v2._texcoord;
 
 
                 v020.position = normalize(0.75*p0 + 0.25*p2) * radius + c;
-                v020.normal = normalize(v020.position).xyz;
+                v020.normal = normalize(0.75*v0.normal + 0.25*v2.normal);
                 v020.vertexEyeSpace = v020.position.xyz;
                 v020._texcoord = 0.75*v0._texcoord + 0.25*v2._texcoord;
 
                 v021.position = normalize(0.50*p0 + 0.50*p2) * radius + c;
-                v021.normal = normalize(v021.position).xyz;
+                v021.normal = normalize(0.50*v0.normal + 0.50*v2.normal);
                 v021.vertexEyeSpace = v021.position.xyz;
                 v021._texcoord = 0.50*v0._texcoord + 0.50*v2._texcoord;
 
                 v022.position = normalize(0.25*p0 + 0.75*p2) * radius + c;
-                v022.normal = normalize(v022.position).xyz;
+                v022.normal = normalize(0.25*v0.normal + 0.75*v2.normal);
                 v022.vertexEyeSpace = v022.position.xyz;
                 v022._texcoord = 0.25*v0._texcoord + 0.75*v2._texcoord;
 
@@ -224,17 +223,17 @@ void main()
                 vec4 p121 = v121.position - c;
 
                 v000.position = normalize((2.0/3.0)*p010 + (1.0/3.0)*p122) * radius + c;
-                v000.normal = normalize(v000.position).xyz;
+                v000.normal = normalize((2.0/3.0)*v010.normal + (1.0/3.0)*v122.normal);
                 v000.vertexEyeSpace = v000.position.xyz;
                 v000._texcoord = (2.0/3.0)*v010._texcoord + (1.0/3.0)*v122._texcoord;
 
                 v002.position = normalize((1.0/3.0)*p010 + (2.0/3.0)*p122) * radius + c;
-                v002.normal = normalize(v002.position).xyz;
+                v002.normal = normalize((1.0/3.0)*v010.normal + (2.0/3.0)*v122.normal);
                 v002.vertexEyeSpace = v002.position.xyz;
                 v002._texcoord = (1.0/3.0)*v010._texcoord + (2.0/3.0)*v122._texcoord;
 
                 v001.position = normalize(0.50*p011 + 0.50*p121) * radius + c;
-                v001.normal = normalize(v001.position).xyz;
+                v001.normal = normalize(0.50*v011.normal + 0.50*v121.normal);
                 v001.vertexEyeSpace = v001.position.xyz;
                 v001._texcoord = 0.50*v011._texcoord + 0.50*v121._texcoord;
 
