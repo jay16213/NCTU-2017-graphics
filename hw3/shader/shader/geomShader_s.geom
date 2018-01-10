@@ -156,108 +156,81 @@ void main()
                 p2 = v[2].position - c;
                 //--------------------------------------------
                 struct Vert v000, v001, v002;
-                struct Vert v010, v011, v012;
-                struct Vert v020, v021, v022;
-                struct Vert v120, v121, v122;
+                struct Vert v01[3];
+                struct Vert v02[3];
+                struct Vert v12[3];
 
-                v010.position = normalize(0.75*p0 + 0.25*p1) * radius + c;
-                v010.normal = normalize(0.75*v[0].normal + 0.25*v[1].normal);
-                v010.vertexEyeSpace = 0.75*v[0].vertexEyeSpace + 0.25*v[1].vertexEyeSpace;
-                v010._texcoord = 0.75*v[0]._texcoord + 0.25*v[1]._texcoord;
+                for(int j = 0; j < 3; j++)
+                {
+                    int ratio1 = 1 * (j + 1);
+                    int ratio0 = 4 - ratio1;
 
-                v011.position = normalize(0.50*p0 + 0.50*p1) * radius + c;
-                v011.normal = normalize(0.50*v[0].normal + 0.50*v[1].normal);
-                v011.vertexEyeSpace = 0.50*v[0].vertexEyeSpace + 0.50*v[1].vertexEyeSpace;
-                v011._texcoord = 0.50*v[0]._texcoord + 0.50*v[1]._texcoord;
+                    v01[j].position = normalize(ratio0*p0 + ratio1*p1) * radius + c;
+                    v01[j].normal = normalize(ratio0*v[0].normal + ratio1*v[1].normal);
+                    v01[j].vertexEyeSpace = (ratio0*v[0].vertexEyeSpace + ratio1*v[1].vertexEyeSpace)*0.25;
+                    v01[j]._texcoord = (ratio0*v[0]._texcoord + ratio1*v[1]._texcoord)*0.25;
 
-                v012.position = normalize(0.25*p0 + 0.75*p1) * radius + c;
-                v012.normal = normalize(0.25*v[0].normal + 0.75*v[1].normal);
-                v012.vertexEyeSpace = 0.25*v[0].vertexEyeSpace + 0.75*v[1].vertexEyeSpace;
-                v012._texcoord = 0.25*v[0]._texcoord + 0.75*v[1]._texcoord;
+                    v12[j].position = normalize(ratio0*p1 + ratio1*p2) * radius + c;
+                    v12[j].normal = normalize(ratio0*v[1].normal + ratio1*v[2].normal);
+                    v12[j].vertexEyeSpace = (ratio0*v[1].vertexEyeSpace + ratio1*v[2].vertexEyeSpace)*0.25;
+                    v12[j]._texcoord = (ratio0*v[1]._texcoord + ratio1*v[2]._texcoord) * 0.25;
 
+                    v02[j].position = normalize(ratio0*p0 + ratio1*p2) * radius + c;
+                    v02[j].normal = normalize(ratio0*v[0].normal + ratio1*v[2].normal);
+                    v02[j].vertexEyeSpace = (ratio0*v[0].vertexEyeSpace + ratio1*v[2].vertexEyeSpace)*0.25;
+                    v02[j]._texcoord = (ratio0*v[0]._texcoord + ratio1*v[2]._texcoord)*0.25;
+                }
 
-                v120.position = normalize(0.75*p1 + 0.25*p2) * radius + c;
-                v120.normal = normalize(0.75*v[1].normal + 0.25*v[2].normal);
-                v120.vertexEyeSpace = 0.75*v[1].vertexEyeSpace + 0.25*v[2].vertexEyeSpace;
-                v120._texcoord = 0.75*v[1]._texcoord + 0.25*v[2]._texcoord;
-
-                v121.position = normalize(0.50*p1 + 0.50*p2) * radius + c;
-                v121.normal = normalize(0.50*v[1].normal + 0.50*v[2].normal);
-                v121.vertexEyeSpace = 0.50*v[1].vertexEyeSpace + 0.50*v[2].vertexEyeSpace;
-                v121._texcoord = 0.50*v[1]._texcoord + 0.50*v[2]._texcoord;
-
-                v122.position = normalize(0.25*p1 + 0.75*p2) * radius + c;
-                v122.normal = normalize(0.25*v[1].normal + 0.75*v[2].normal);
-                v122.vertexEyeSpace = 0.25*v[1].vertexEyeSpace + 0.75*v[2].vertexEyeSpace;
-                v122._texcoord = 0.25*v[1]._texcoord + 0.75*v[2]._texcoord;
-
-
-                v020.position = normalize(0.75*p0 + 0.25*p2) * radius + c;
-                v020.normal = normalize(0.75*v[0].normal + 0.25*v[2].normal);
-                v020.vertexEyeSpace = 0.75*v[0].vertexEyeSpace + 0.25*v[2].vertexEyeSpace;
-                v020._texcoord = 0.75*v[0]._texcoord + 0.25*v[2]._texcoord;
-
-                v021.position = normalize(0.50*p0 + 0.50*p2) * radius + c;
-                v021.normal = normalize(0.50*v[0].normal + 0.50*v[2].normal);
-                v021.vertexEyeSpace = 0.50*v[0].vertexEyeSpace + 0.50*v[2].vertexEyeSpace;
-                v021._texcoord = 0.50*v[0]._texcoord + 0.50*v[2]._texcoord;
-
-                v022.position = normalize(0.25*p0 + 0.75*p2) * radius + c;
-                v022.normal = normalize(0.25*v[0].normal + 0.75*v[2].normal);
-                v022.vertexEyeSpace = 0.25*v[0].vertexEyeSpace + 0.75*v[2].vertexEyeSpace;
-                v022._texcoord = 0.25*v[0]._texcoord + 0.75*v[2]._texcoord;
-
-
-                vec4 p010 = v010.position - c;
-                vec4 p122 = v122.position - c;
-                vec4 p011 = v010.position - c;
-                vec4 p121 = v121.position - c;
+                vec4 p010 = v01[0].position - c;
+                vec4 p122 = v12[2].position - c;
+                vec4 p011 = v01[0].position - c;
+                vec4 p121 = v12[1].position - c;
 
                 v000.position = normalize((2.0/3.0)*p010 + (1.0/3.0)*p122) * radius + c;
-                v000.normal = normalize((2.0/3.0)*v010.normal + (1.0/3.0)*v122.normal);
-                v000.vertexEyeSpace = (2.0/3.0)*v010.vertexEyeSpace + (1.0/3.0)*v122.vertexEyeSpace;
-                v000._texcoord = (2.0/3.0)*v010._texcoord + (1.0/3.0)*v122._texcoord;
+                v000.normal = normalize((2.0/3.0)*v01[0].normal + (1.0/3.0)*v12[2].normal);
+                v000.vertexEyeSpace = (2.0/3.0)*v01[0].vertexEyeSpace + (1.0/3.0)*v12[2].vertexEyeSpace;
+                v000._texcoord = (2.0/3.0)*v01[0]._texcoord + (1.0/3.0)*v12[2]._texcoord;
 
                 v002.position = normalize((1.0/3.0)*p010 + (2.0/3.0)*p122) * radius + c;
-                v002.normal = normalize((1.0/3.0)*v010.normal + (2.0/3.0)*v122.normal);
-                v002.vertexEyeSpace = (1.0/3.0)*v010.vertexEyeSpace + (2.0/3.0)*v122.vertexEyeSpace;;
-                v002._texcoord = (1.0/3.0)*v010._texcoord + (2.0/3.0)*v122._texcoord;
+                v002.normal = normalize((1.0/3.0)*v01[0].normal + (2.0/3.0)*v12[2].normal);
+                v002.vertexEyeSpace = (1.0/3.0)*v01[0].vertexEyeSpace + (2.0/3.0)*v12[2].vertexEyeSpace;;
+                v002._texcoord = (1.0/3.0)*v01[0]._texcoord + (2.0/3.0)*v12[2]._texcoord;
 
                 v001.position = normalize(0.50*p011 + 0.50*p121) * radius + c;
-                v001.normal = normalize(0.50*v011.normal + 0.50*v121.normal);
-                v001.vertexEyeSpace = 0.50*v011.vertexEyeSpace + 0.50*v121.vertexEyeSpace;;
-                v001._texcoord = 0.50*v011._texcoord + 0.50*v121._texcoord;
+                v001.normal = normalize(0.50*v01[1].normal + 0.50*v12[1].normal);
+                v001.vertexEyeSpace = 0.50*v01[1].vertexEyeSpace + 0.50*v12[1].vertexEyeSpace;;
+                v001._texcoord = 0.50*v01[1]._texcoord + 0.50*v12[1]._texcoord;
 
                 // output
-                outputVert(v022);
+                outputVert(v02[2]);
                 outputVert(v[2]);
-                outputVert(v122);
+                outputVert(v12[2]);
                 EndPrimitive();
 
-                outputVert(v021);
-                outputVert(v022);
+                outputVert(v02[1]);
+                outputVert(v02[2]);
                 outputVert(v002);
-                outputVert(v122);
-                outputVert(v121);
+                outputVert(v12[2]);
+                outputVert(v12[1]);
                 EndPrimitive();
 
-                outputVert(v020);
-                outputVert(v021);
+                outputVert(v02[0]);
+                outputVert(v02[1]);
                 outputVert(v000);
                 outputVert(v002);
                 outputVert(v001);
-                outputVert(v121);
-                outputVert(v120);
+                outputVert(v12[1]);
+                outputVert(v12[0]);
                 EndPrimitive();
 
                 outputVert(v[0]);
-                outputVert(v020);
-                outputVert(v010);
+                outputVert(v02[0]);
+                outputVert(v01[0]);
                 outputVert(v000);
-                outputVert(v011);
+                outputVert(v01[1]);
                 outputVert(v001);
-                outputVert(v012);
-                outputVert(v120);
+                outputVert(v01[2]);
+                outputVert(v12[0]);
                 outputVert(v[1]);
                 EndPrimitive();
             }
