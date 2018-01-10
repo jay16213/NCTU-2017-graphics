@@ -25,17 +25,13 @@ void loadSingleTexture(Texture *tex, unsigned int *texObj, int *texObjIndex)
     int height = FreeImage_GetHeight(p32BitsImg);
 
     glBindTexture(GL_TEXTURE_2D, texObj[(*texObjIndex)]);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height,
         0, GL_BGRA, GL_UNSIGNED_BYTE, (void *)FreeImage_GetBits(p32BitsImg));
 
     glGenerateMipmap(GL_TEXTURE_2D);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 3);
-
-    glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
 
     FreeImage_Unload(p32BitsImg);
     FreeImage_Unload(pImg);

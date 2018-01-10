@@ -2,9 +2,6 @@
 
 void renderObj(mesh *obj, unsigned int *texObj, int texType, int texObjIndex)
 {
-    glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LEQUAL);
-
     switch (texType)
     {
         case NO_TEXTURE:
@@ -43,6 +40,14 @@ void renderWithNoTex(mesh *obj)
 
 void renderWithSingleTex(mesh *obj, unsigned int *texObj, int texType, int texObjIndex)
 {
+    glEnable(GL_ALPHA_TEST);
+    glAlphaFunc(GL_GREATER, 0.5f);
+
+    glActiveTexture(GL_TEXTURE0);
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, texObj[0]);
+    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+
     int lastMaterial = -1;
     for (size_t i = 0; i < obj->fTotal; i++)
     {
@@ -66,5 +71,6 @@ void renderWithSingleTex(mesh *obj, unsigned int *texObj, int texType, int texOb
         glEnd();
     }
 
+    glDisable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, 0);
 }

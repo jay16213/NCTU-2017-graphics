@@ -62,33 +62,21 @@ int main(int argc, char **argv)
     glutCreateWindow("Assignment 3");
 
     glewInit();
-    if (glewIsSupported("GL_VERSION_2_1"))
-        printf("Ready for OpenGL 2.1\n");
-    else {
-        printf("OpenGL 2.1 not supported\n");
-        exit(1);
-    }
-    if (GLEW_ARB_vertex_shader && GLEW_ARB_fragment_shader && GL_EXT_geometry_shader4)
-        printf("Ready for GLSL - vertex, fragment, and geometry units\n");
-    else {
-        printf("Not totally ready :( \n");
-        exit(1);
-    }
-
-    glutDisplayFunc(Display);
-    glutReshapeFunc(changeSize);
-    glutKeyboardFunc(Keyboard);
 
     if (res == 1)
     {
         Texture *tex = &scene.mComponents[0].mTex;
-        glGenTextures(scene.mNumOfTextures, texObj);
+        glGenTextures(1, texObj);
         FreeImage_Initialise();
         loadTexture(tex, texObj, &texObjIndex);
         FreeImage_DeInitialise();
     }
 
     LoadShaders(res);
+
+    glutDisplayFunc(Display);
+    glutKeyboardFunc(Keyboard);
+    glutReshapeFunc(changeSize);
     glutMainLoop();
 
     delete files;
@@ -117,8 +105,8 @@ void LoadShaders(int res)
 void lighting()
 {
     //enable lighting
-    glEnable(GL_LIGHTING);
     glShadeModel(GL_SMOOTH);
+    glEnable(GL_LIGHTING);
 
     //set light property
     for (size_t i = 0; i < light.mObjLight.size(); i++)
@@ -139,6 +127,10 @@ void Display()
 {
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     glClearDepth(1.0f);
+
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LEQUAL);
+
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     //stretch to screen
@@ -160,9 +152,6 @@ void Display()
 
     if (res == 1)
     {
-        glActiveTexture(GL_TEXTURE0);
-        glEnable(GL_TEXTURE_2D);
-        glBindTexture(GL_TEXTURE_2D, texObj[0]);
         glUniform1i(glGetUniformLocation(MyShader, "colorTexture"), 0);
         glUniform1i(glGetUniformLocation(MyShader, "level"), level);
         glUniform1f(glGetUniformLocation(MyShader, "radius"), 1.0f);
@@ -178,6 +167,7 @@ void Display()
         for (int j = 0; j < scene.mComponents[i].mNumOfModels; j++)
         {
             Model *m = &scene.mComponents[i].mModels[j];
+
             glPushMatrix();
             glTranslatef(m->mTransfer[X], m->mTransfer[Y], m->mTransfer[Z]);
             glRotatef(m->mAngle, m->mRotateAxisVec[X], m->mRotateAxisVec[Y], m->mRotateAxisVec[Z]);
@@ -188,8 +178,8 @@ void Display()
         }
     }
 
-    glFlush();
     glUseProgram(0);
+    glFlush();
     glutSwapBuffers();
     return;
 }
